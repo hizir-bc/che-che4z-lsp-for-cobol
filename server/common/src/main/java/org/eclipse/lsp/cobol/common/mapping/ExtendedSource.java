@@ -22,7 +22,7 @@ import org.eclipse.lsp4j.Range;
 import java.util.*;
 
 /** Container fot mappable modifications on source code files */
-public class ExtendedSource {
+public class ExtendedSource implements Mapping {
 
   private final Map<String, DocumentMap> documents = new HashMap<>();
   private final String mainUri;
@@ -85,14 +85,14 @@ public class ExtendedSource {
    * @param range in the extended document
    * @return a location of original source
    */
-  public Location mapLocation(Range range) {
+  public OriginalLocation mapLocation(Range range) {
     String lastUri = mainUri;
     Location lastLocation = documents.get(lastUri).mapLocation(range, true);
     while (!Objects.equals(lastLocation.getUri(), lastUri)) {
       lastUri = lastLocation.getUri();
       lastLocation = documents.get(lastUri).mapLocation(lastLocation.getRange(), true);
     }
-    return lastLocation;
+    return new OriginalLocation(lastLocation, "");
   }
 
   /**

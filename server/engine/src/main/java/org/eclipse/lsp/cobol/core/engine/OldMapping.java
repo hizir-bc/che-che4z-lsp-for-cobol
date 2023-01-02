@@ -17,11 +17,15 @@ package org.eclipse.lsp.cobol.core.engine;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.lsp.cobol.common.mapping.ExtendedSource;
+import org.eclipse.lsp.cobol.common.mapping.Mapping;
+import org.eclipse.lsp.cobol.common.mapping.OriginalLocation;
 import org.eclipse.lsp.cobol.common.model.Locality;
 import org.eclipse.lsp.cobol.core.model.EmbeddedCode;
 import org.eclipse.lsp.cobol.core.model.OldExtendedDocument;
 import org.eclipse.lsp.cobol.core.preprocessor.delegates.util.LocalityMappingUtils;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -33,7 +37,7 @@ import java.util.function.Predicate;
  * @deprecated should be replaced with the new mapping
  */
 @Deprecated
-public class OldMapping {
+public class OldMapping implements Mapping {
   private static final int RANGE_LOOK_BACK_TOKENS = 5;
   private final Map<Token, Locality> map;
 
@@ -55,7 +59,7 @@ public class OldMapping {
     mapping.forEach(
             (k, v) -> {
               if (v.getUri().equals(documentUri)) {
-                Location l = extendedSource.mapLocation(v.getRange());
+                Location l = extendedSource.mapLocation(v.getRange()).getLocation();
 
                 v.getRange().setStart(l.getRange().getStart());
                 v.getRange().setEnd(l.getRange().getEnd());
@@ -63,6 +67,12 @@ public class OldMapping {
               }
             });
     map = mapping;
+  }
+
+  public static Range toRange(Token token) {
+    return new Range(
+            new Position(token.getLine() - 1, token.getCharPositionInLine()),
+            new Position(token.getLine() - 1, token.getCharPositionInLine() + token.getText().length()));
   }
 
   /**
@@ -81,7 +91,16 @@ public class OldMapping {
    * @return location of token
    */
   public Locality map(Token token, Locality ifAbsent) {
-    return map.computeIfAbsent(token, (it) -> ifAbsent);
+    return map.computeIfAbsent(token, it -> ifAbsent);
+  }
+
+  @Override
+  public OriginalLocation mapLocation(Range range) {
+    Optional<Map.Entry<Token, Locality>> localityEntry = map.entrySet().stream().filter(e -> toRange(e.getKey()).equals(range)).findFirst();
+    return localityEntry
+            .map(Map.Entry::getValue)
+            .map(l -> new OriginalLocation(l.toLocation(), l.getCopybookId()))
+            .orElse(null);
   }
 
   private Map.Entry<Token, Locality> lookBackLocality(int index) {

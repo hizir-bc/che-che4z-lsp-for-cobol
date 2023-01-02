@@ -244,7 +244,7 @@ public class CobolLanguageEngine {
                     .unwrap(preprocessorErrors::addAll);
     preprocessorErrors.forEach(e -> e.getLocation().getLocation().setRange(extendedSource
                                             .mapLocation(e.getLocation().getLocation().getRange())
-                                            .getRange()));
+                                            .getLocation().getRange()));
     ctx.getAccumulatedErrors().addAll(preprocessorErrors);
     CopybooksRepository copybooks = oldExtendedDocument.getCopybooks();
 
@@ -381,9 +381,12 @@ public class CobolLanguageEngine {
         .filter(shouldRaise())
         .map(
             err ->
-                err.toBuilder()
-                    .location(copyStatements.get(err.getLocation().getCopybookId()).toOriginalLocation())
-                    .errorSource(ErrorSource.COPYBOOK))
+            {
+              Locality locality = copyStatements.get(err.getLocation().getCopybookId());
+              return err.toBuilder()
+                  .location(locality == null ? null : locality.toOriginalLocation())
+                  .errorSource(ErrorSource.COPYBOOK);
+            })
         .map(SyntaxError.SyntaxErrorBuilder::build)
         .flatMap(err -> Stream.concat(raiseError(err, copyStatements).stream(), Stream.of(err)))
         .collect(toList());

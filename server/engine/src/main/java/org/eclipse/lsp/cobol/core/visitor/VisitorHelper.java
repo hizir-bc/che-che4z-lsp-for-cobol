@@ -81,22 +81,6 @@ public class VisitorHelper {
   }
 
   /**
-   * Get interval position of 2 localities
-   *
-   * @param start is a start position
-   * @param stop is end position
-   * @return Locality with interval position
-   */
-  Locality getIntervalPosition(Locality start, Locality stop) {
-    return Locality.builder()
-        .uri(start.getUri())
-        .range(new Range(start.getRange().getStart(), stop.getRange().getEnd()))
-        .recognizer(VisitorHelper.class)
-        .copybookId(start.getCopybookId())
-        .build();
-  }
-
-  /**
    * Extract picture texts
    *
    * @param clauses a list of ANTLR picture clauses

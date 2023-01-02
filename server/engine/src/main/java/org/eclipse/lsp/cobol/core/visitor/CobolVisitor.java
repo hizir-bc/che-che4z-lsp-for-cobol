@@ -32,6 +32,7 @@ import org.eclipse.lsp.cobol.common.EmbeddedLanguage;
 import org.eclipse.lsp.cobol.common.error.ErrorSeverity;
 import org.eclipse.lsp.cobol.common.error.ErrorSource;
 import org.eclipse.lsp.cobol.common.error.SyntaxError;
+import org.eclipse.lsp.cobol.common.mapping.OriginalLocation;
 import org.eclipse.lsp.cobol.common.message.MessageService;
 import org.eclipse.lsp.cobol.common.model.*;
 import org.eclipse.lsp.cobol.common.model.tree.*;
@@ -245,7 +246,8 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                 addTreeNode(
                     ctx,
                     locality ->
-                        new ProcedureSectionNode(locality, name, getIntervalText(ctx), def)))
+                        new ProcedureSectionNode(locality, name, getIntervalText(ctx),
+                                def.toLocality(ctx.getStart().getText()))))
         .orElseGet(() -> visitChildren(ctx));
   }
 
@@ -258,7 +260,8 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
         .map(
             def ->
                 addTreeNode(
-                    ctx, locality -> new ParagraphNode(locality, name, getIntervalText(ctx), def)))
+                    ctx, locality -> new ParagraphNode(locality, name, getIntervalText(ctx),
+                                def.toLocality(ctx.getStart().getText()))))
         .orElseGet(() -> visitChildren(ctx));
   }
 
@@ -342,7 +345,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                     ctx,
                     locality ->
                         new DeclarativeProcedureSectionNode(
-                            locality, name, getIntervalText(ctx), def)))
+                            locality, name, getIntervalText(ctx), def.toLocality(ctx.getStart().getText()))))
         .orElseGet(() -> visitChildren(ctx));
   }
 
@@ -381,7 +384,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
   private void checkFileControlUniqueness(FileControlEntryContext ctx, String filename) {
     getLocality(ctx.selectClause().fileName().getStart())
         .ifPresent(
-            locality -> {
+            originalLocation -> {
               if (fileControls.containsKey(filename.toUpperCase())) {
                 SyntaxError error =
                     SyntaxError.syntaxError()
@@ -389,7 +392,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                         .suggestion(
                             messageService.getMessage("CobolVisitor.duplicateFileName", filename))
                         .severity(ErrorSeverity.ERROR)
-                        .location(locality.toOriginalLocation())
+                        .location(originalLocation)
                         .build();
                 errors.add(error);
                 LOG.debug("Syntax error by CobolVisitor#visitSelectClause: {}", error);
@@ -461,7 +464,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                         it ->
                             ImmutableList.of(
                                 new EmbeddedCodeNode(
-                                    it, code.getTokenStream(), code.getTree(), language))))
+                                    it.toLocality(parent.getStart().getText()), code.getTokenStream(), code.getTree(), language))))
         .orElse(ImmutableList.of());
   }
 
@@ -542,16 +545,14 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
 
   @Override
   public List<Node> visitEnvironmentSwitchNameClause(EnvironmentSwitchNameClauseContext ctx) {
-    Locality locality =
-        getLocality(
-                Optional.<ParserRuleContext>ofNullable(ctx.mnemonicName()).orElse(ctx).getStart())
-            .orElse(null);
+    Token token = Optional.<ParserRuleContext>ofNullable(ctx.mnemonicName()).orElse(ctx).getStart();
     String name = ofNullable(ctx.mnemonicName()).map(RuleContext::getText).orElse(FILLER_NAME);
     String systemName = ctx.environmentName().getText();
+    Locality statementLocality = getLocality(token).map(l -> l.toLocality(token.getText())).orElse(null);
     return addTreeNode(
         VariableDefinitionNode.builder()
-            .statementLocality(locality)
-            .variableNameAndLocality(new VariableNameAndLocality(name, locality))
+            .statementLocality(statementLocality)
+            .variableNameAndLocality(new VariableNameAndLocality(name, statementLocality))
             .systemName(systemName)
             .build(),
         visitChildren(ctx));
@@ -767,10 +768,10 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
     String subroutineName = PreprocessorStringUtils.trimQuotes(ctx.getText()).toUpperCase();
     return getLocality(ctx.getStart())
         .map(
-            locality -> {
-              if (cachingConfigurationService.getSubroutineDirectories().size() > 0
+            originalLocation -> {
+              if (!cachingConfigurationService.getSubroutineDirectories().isEmpty()
                   && !subroutineService.getUri(subroutineName).isPresent()) {
-                reportSubroutineNotDefined(subroutineName, locality);
+                reportSubroutineNotDefined(subroutineName, originalLocation);
               }
               subroutineDefinitionMap.putIfAbsent(
                   subroutineName,
@@ -785,7 +786,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                                   new Location(
                                       ImplicitCodeUtils.createSubroutineLocation(), new Range())),
                       subroutineName));
-              SubroutineNameNode usage = new SubroutineNameNode(locality, subroutineName);
+              SubroutineNameNode usage = new SubroutineNameNode(originalLocation.toLocality(ctx.getStart().getText()), subroutineName);
               SubroutineDefinition foundDefinition = subroutineDefinitionMap.get(subroutineName);
               foundDefinition.addUsages(usage);
               usage.setDefinition(foundDefinition);
@@ -827,11 +828,11 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
     return addTreeNode(ctx, AtEndNode::new);
   }
 
-  private void throwException(String wrongToken, @NonNull Locality locality, String message) {
+  private void throwException(String wrongToken, @NonNull OriginalLocation originalLocation, String message) {
     SyntaxError error =
         SyntaxError.syntaxError()
             .errorSource(ErrorSource.PARSING)
-            .location(locality.toOriginalLocation())
+            .location(originalLocation)
             .suggestion(message + wrongToken)
             .severity(ErrorSeverity.WARNING)
             .build();
@@ -842,17 +843,17 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
     }
   }
 
-  private Optional<Locality> getLocality(Token childToken) {
-    return ofNullable(positions.map(childToken));
+  private Optional<OriginalLocation> getLocality(Token childToken) {
+    return ofNullable(positions.mapLocation(OldMapping.toRange(childToken)));
   }
 
-  private void reportSubroutineNotDefined(String name, Locality locality) {
+  private void reportSubroutineNotDefined(String name, OriginalLocation location) {
     SyntaxError error =
         SyntaxError.syntaxError()
             .errorSource(ErrorSource.PARSING)
             .suggestion(messageService.getMessage("CobolVisitor.subroutineNotFound", name))
             .severity(ErrorSeverity.INFO)
-            .location(getIntervalPosition(locality, locality).toOriginalLocation())
+            .location(location)
             .build();
     LOG.debug("Syntax error by CobolVisitor#reportSubroutineNotDefined: {}", error);
     errors.add(error);
@@ -868,14 +869,16 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                     .ifPresent(locality -> reportMisspelledKeyword(correctWord, locality)));
   }
 
-  private void reportMisspelledKeyword(String suggestion, Locality locality) {
-    if (locality == null) return;
+  private void reportMisspelledKeyword(String suggestion, OriginalLocation originalLocation) {
+    if (originalLocation == null) {
+      return;
+    }
     SyntaxError error =
         SyntaxError.syntaxError()
             .errorSource(ErrorSource.PARSING)
             .suggestion(messageService.getMessage("CobolVisitor.misspelledWord", suggestion))
             .severity(ErrorSeverity.WARNING)
-            .location(locality.toOriginalLocation())
+            .location(originalLocation)
             .build();
     LOG.debug("Syntax error by CobolVisitor#reportMisspelledKeyword: {}", error);
     errors.add(error);
@@ -887,7 +890,7 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
       return;
     }
     getLocality(token)
-        .filter(it -> it.getRange().getStart().getCharacter() > AREA_A_FINISH)
+        .filter(it -> it.getLocation().getRange().getStart().getCharacter() > AREA_A_FINISH)
         .ifPresent(
             it ->
                 throwException(
@@ -917,9 +920,9 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
                             messageService.getMessage("CobolVisitor.AreaBWarningMsg"))));
   }
 
-  private Predicate<Locality> startsInAreaA(Token token) {
+  private Predicate<OriginalLocation> startsInAreaA(Token token) {
     return it -> {
-      int charPosition = it.getRange().getStart().getCharacter();
+      int charPosition = it.getLocation().getRange().getStart().getCharacter();
       return charPosition > 6 && charPosition < 11 && token.getChannel() != HIDDEN;
     };
   }

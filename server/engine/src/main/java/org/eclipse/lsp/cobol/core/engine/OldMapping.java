@@ -27,9 +27,7 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -39,10 +37,15 @@ import java.util.function.Predicate;
 @Deprecated
 public class OldMapping implements Mapping {
   private static final int RANGE_LOOK_BACK_TOKENS = 5;
-  private final Map<Token, Locality> map;
+  private final Map<Token, OriginalLocation> map = new HashMap<>();
+  private final Map<Range, OriginalLocation> rangeMap = new HashMap<>();
 
-  public OldMapping(Map<Token, Locality> map) {
-    this.map = map;
+  public OldMapping(Map<Token, Locality> initialMap) {
+    initialMap.forEach((k, v) -> {
+      OriginalLocation location = new OriginalLocation(v.toLocation(), v.getCopybookId());
+      map.put(k, location);
+      rangeMap.put(toRange(k), location);
+    });
   }
   public OldMapping(
           String documentUri,
@@ -65,14 +68,21 @@ public class OldMapping implements Mapping {
                 v.getRange().setEnd(l.getRange().getEnd());
                 v.setUri(l.getUri());
               }
+              OriginalLocation location = new OriginalLocation(v.toLocation(), v.getCopybookId());
+              map.put(k, location);
+              rangeMap.put(toRange(k), location);
             });
-    map = mapping;
   }
 
+  /**
+   * Extract token range
+   * @param token a token
+   * @return a range
+   */
   public static Range toRange(Token token) {
     return new Range(
             new Position(token.getLine() - 1, token.getCharPositionInLine()),
-            new Position(token.getLine() - 1, token.getCharPositionInLine() + token.getText().length()));
+            new Position(token.getLine() - 1, token.getCharPositionInLine() + token.getStopIndex() - token.getStartIndex() + 1));
   }
 
   /**
@@ -81,7 +91,8 @@ public class OldMapping implements Mapping {
    * @return location of token
    */
   public Locality map(Token token) {
-    return map.get(token);
+    OriginalLocation originalLocation = map.get(token);
+    return originalLocation == null ? null : originalLocation.toLocality(token.getText());
   }
 
   /**
@@ -91,19 +102,16 @@ public class OldMapping implements Mapping {
    * @return location of token
    */
   public Locality map(Token token, Locality ifAbsent) {
-    return map.computeIfAbsent(token, it -> ifAbsent);
+    return map.computeIfAbsent(token, it -> new OriginalLocation(ifAbsent.toLocation(), ifAbsent.getCopybookId()))
+            .toLocality(token.getText());
   }
 
   @Override
   public OriginalLocation mapLocation(Range range) {
-    Optional<Map.Entry<Token, Locality>> localityEntry = map.entrySet().stream().filter(e -> toRange(e.getKey()).equals(range)).findFirst();
-    return localityEntry
-            .map(Map.Entry::getValue)
-            .map(l -> new OriginalLocation(l.toLocation(), l.getCopybookId()))
-            .orElse(null);
+    return rangeMap.get(range);
   }
 
-  private Map.Entry<Token, Locality> lookBackLocality(int index) {
+  private Map.Entry<Token, OriginalLocation> lookBackLocality(int index) {
     if (index < 0) {
       return null;
     }
@@ -115,11 +123,11 @@ public class OldMapping implements Mapping {
             .orElse(null);
   }
 
-  private Predicate<Map.Entry<Token, Locality>> isNotHidden() {
+  private Predicate<Map.Entry<Token, OriginalLocation>> isNotHidden() {
     return it -> it.getKey().getChannel() != Token.HIDDEN_CHANNEL;
   }
 
-  private Predicate<Map.Entry<Token, Locality>> previousIndexes(int index) {
+  private Predicate<Map.Entry<Token, OriginalLocation>> previousIndexes(int index) {
     return it ->
             it.getKey().getTokenIndex() <= index
                     && it.getKey().getTokenIndex() >= index - RANGE_LOOK_BACK_TOKENS;
@@ -135,7 +143,7 @@ public class OldMapping implements Mapping {
    */
   public Locality findPreviousVisibleLocality(int tokenIndex) {
     return Optional.ofNullable(lookBackLocality(tokenIndex))
-        .map(e ->  map(e.getKey(), e.getValue()))
+        .map(e ->  map(e.getKey(), e.getValue() == null ? null : e.getValue().toLocality(e.getKey().getText())))
         .orElse(null);
   }
 }

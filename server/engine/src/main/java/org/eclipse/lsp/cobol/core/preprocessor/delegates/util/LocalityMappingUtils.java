@@ -140,11 +140,13 @@ public class LocalityMappingUtils {
       Map<Token, Locality> result,
       Deque<DocumentHierarchyLevel> documentHierarchyStack, int currentIndex) {
     Token token = tokens.get(currentIndex);
+    boolean isCobolLexer = token.getTokenSource() instanceof CobolLexer;
+
     // Check that this token is copy entry as defined in CobolLexer
-    if (token.getType() == COPYENTRY && token.getTokenSource() instanceof CobolLexer) {
+    if (token.getType() == COPYENTRY && isCobolLexer) {
       enterDocument(
           extractCopybookName(token.getText()), documentPositions, documentHierarchyStack);
-    } else if (token.getType() == COPYEXIT && token.getTokenSource() instanceof CobolLexer) {
+    } else if (token.getType() == COPYEXIT && isCobolLexer) {
       exitDocument(documentHierarchyStack);
     } else {
       currentIndex = mapTokenToPosition(tokens, result, currentDocument(documentHierarchyStack), currentIndex);
@@ -155,8 +157,11 @@ public class LocalityMappingUtils {
   private int mapTokenToPosition(
           List<Token> tokens, Map<Token, Locality> mappingAccumulator, DocumentHierarchyLevel document, int currentIndex) {
     Locality locality = document.getCurrent();
+    if (locality == null) {
+      return currentIndex;
+    }
+
     Token token = tokens.get(currentIndex);
-    if (locality == null) return currentIndex;
     if (tokenMatches(token.getText(), locality, document)) {
       mappingAccumulator.put(token, locality);
       document.forward();

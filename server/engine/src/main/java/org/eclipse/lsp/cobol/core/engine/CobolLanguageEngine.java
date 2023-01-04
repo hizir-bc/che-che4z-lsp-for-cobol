@@ -250,11 +250,11 @@ public class CobolLanguageEngine {
 
     // Update copybook usages with proper positions
     copybooks.getUsages()
-            .forEach((k, v) -> v.setRange(extendedSource.mapLocation(v.getRange()).getRange()));
+            .forEach((k, v) -> v.setRange(extendedSource.mapLocation(v.getRange()).getLocation().getRange()));
 
     // Update copybook definition statements with proper positions
     copybooks.getDefinitionStatements()
-            .forEach((k, v) -> v.setRange(extendedSource.mapLocation(v.getRange()).getRange()));
+            .forEach((k, v) -> v.setRange(extendedSource.mapLocation(v.getRange()).getLocation().getRange()));
 
     return oldExtendedDocument;
   }
@@ -380,8 +380,7 @@ public class CobolLanguageEngine {
     return Stream.of(error)
         .filter(shouldRaise())
         .map(
-            err ->
-            {
+            err -> {
               Locality locality = copyStatements.get(err.getLocation().getCopybookId());
               return err.toBuilder()
                   .location(locality == null ? null : locality.toOriginalLocation())

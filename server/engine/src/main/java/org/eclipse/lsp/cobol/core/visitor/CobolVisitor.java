@@ -38,6 +38,7 @@ import org.eclipse.lsp.cobol.common.model.*;
 import org.eclipse.lsp.cobol.common.model.tree.*;
 import org.eclipse.lsp.cobol.common.model.tree.variable.*;
 import org.eclipse.lsp.cobol.common.utils.PreprocessorStringUtils;
+import org.eclipse.lsp.cobol.core.CobolLexer;
 import org.eclipse.lsp.cobol.core.CobolParser;
 import org.eclipse.lsp.cobol.core.CobolParserBaseVisitor;
 import org.eclipse.lsp.cobol.core.engine.OldMapping;
@@ -843,8 +844,13 @@ public class CobolVisitor extends CobolParserBaseVisitor<List<Node>> {
     }
   }
 
-  private Optional<OriginalLocation> getLocality(Token childToken) {
-    return ofNullable(positions.mapLocation(OldMapping.toRange(childToken)));
+  private Optional<OriginalLocation> getLocality(Token token) {
+    if(token.getTokenSource() instanceof CobolLexer) {
+      return ofNullable(positions.mapLocation(OldMapping.toRange(token)));
+    } else {
+      // FIXME: remove after embedded mapping fix
+      return ofNullable(positions.map(token).toOriginalLocation());
+    }
   }
 
   private void reportSubroutineNotDefined(String name, OriginalLocation location) {

@@ -11,7 +11,6 @@
 007300 DATA   DIVISION.
 *DACO: SCHEMA SECTION.
 *DACO:     DB IVVPO31M WITHIN DAFDB01 .
-       COPY IDMS SUBSCHEMA-NAMES.
 007400 WORKING-STORAGE SECTION.
 007500 01  WS-AREA.
 007600     03 AREA-XW1.
@@ -31,6 +30,7 @@
 058500 PROCEDURE DIVISION.                                              52
 103800 S410 SECTION.                                                    01
 104000 S410-000.                                                        01
+       COPY IDMS SUBSCHEMA-NAMES.
 *DACO:     MOVE 8006                   TO LDM-SEQUENCE                  DMLC8006
 *DACO:                                                                 .
 104600     IF ERROR-STATUS = '8826'                                     48

@@ -110,7 +110,7 @@ export function loadProcessorGroupDialectConfig(
   configObject: unknown,
 ): unknown {
   try {
-    const pgCfg = loadProcessorsConfig(item.scopeUri);
+    const pgCfg: any = loadProcessorsConfig(item.scopeUri);
     if (pgCfg === undefined) {
       return configObject;
     }
@@ -244,7 +244,7 @@ function loadProcessorGroupSettings<T>(
   dialect: string = "COBOL",
 ): T | undefined {
   try {
-    const pgCfg = loadProcessorsConfig(scopeUri);
+    const pgCfg: any = loadProcessorsConfig(scopeUri);
     if (pgCfg === undefined) {
       return configObject;
     }

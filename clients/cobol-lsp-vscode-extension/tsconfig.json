@@ -22,7 +22,8 @@
     "moduleResolution": "node",
     "outDir": "out",
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noImplicitAny": true
   },
   "exclude": ["node_modules", "server", ".vscode-test"]
 }

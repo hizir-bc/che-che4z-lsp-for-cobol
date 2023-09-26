@@ -40,7 +40,7 @@ export class ToggleComments {
    * Do commenting/uncommenting.
    */
   public doIt() {
-    const replacingList = [];
+    const replacingList: { selection: vscode.Range; text: string }[] = [];
     for (const selection of this.textEditor.selections)
       replacingList.push(this.handleSelection(selection));
     if (replacingList.length === 0) return;

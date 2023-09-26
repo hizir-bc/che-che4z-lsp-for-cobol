@@ -180,15 +180,18 @@ export function deleteFile(path: string) {
   fs.rmSync(path);
 }
 
-export function recursiveCopySync(origin, dest) {
+export function recursiveCopySync(origin: fs.PathLike, dest: fs.PathLike) {
   if (fs.existsSync(origin)) {
     if (fs.statSync(origin).isDirectory()) {
       fs.mkdirSync(dest, { recursive: true });
       fs.readdirSync(origin).forEach((file) =>
-        recursiveCopySync(path.join(origin, file), path.join(dest, file)),
+        recursiveCopySync(
+          path.join(origin.toString(), file),
+          path.join(dest.toString(), file),
+        ),
       );
     } else {
-      const destFolder = path.dirname(dest);
+      const destFolder = path.dirname(dest.toString());
       if (!fs.existsSync(destFolder))
         fs.mkdirSync(destFolder, { recursive: true });
       fs.copyFileSync(origin, dest);

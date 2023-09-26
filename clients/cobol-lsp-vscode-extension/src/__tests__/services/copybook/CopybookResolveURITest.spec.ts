@@ -110,7 +110,7 @@ describe("Resolve local copybook against bad configuration of target folders", (
     expect(
       fsUtils.searchCopybookInWorkspace(copybookName, [], COPYBOOK_EXT_ARRAY),
     ).toBe(undefined);
-    (globSync as any) = jest.fn().mockReturnValue((x) => x);
+    (globSync as any) = jest.fn().mockReturnValue((x: any) => x);
   });
   test("given a folder that not contains copybooks, the target copybook is not retrieved", () => {
     (globSync as any) = jest.fn().mockReturnValue([]);

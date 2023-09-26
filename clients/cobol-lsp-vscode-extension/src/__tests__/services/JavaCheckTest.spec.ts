@@ -71,10 +71,10 @@ describe("Checks Java installation", () => {
 
   beforeEach(() => {
     javaCheck = new JavaCheck();
-    checkFn = (event, callbackFn) => {
+    checkFn = (event: string | number, callbackFn: any) => {
       map[event] = callbackFn;
     };
-    stderrFn = (event, callbackFn) => {
+    stderrFn = (event: string | number, callbackFn: any) => {
       map[event] = callbackFn;
     };
     map = {};

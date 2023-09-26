@@ -13,7 +13,10 @@
  */
 
 import * as path from "path";
-import TelemetryReporter from "@vscode/extension-telemetry";
+import TelemetryReporter, {
+  TelemetryEventMeasurements,
+  TelemetryEventProperties,
+} from "@vscode/extension-telemetry";
 import { TelemetryReporterImpl } from "../../../services/reporter/TelemetryReporterImpl";
 import { TelemetryService } from "../../../services/reporter/TelemetryService";
 
@@ -26,12 +29,28 @@ const FAKE_ROOT_PATH: string = path.join(
   "folder2",
   "folder3",
 );
-let spySendTelemetry;
-let spySendExceptionTelemetry;
+let spySendTelemetry: jest.SpyInstance<
+  void,
+  [
+    eventName: string,
+    properties?: TelemetryEventProperties,
+    measurements?: TelemetryEventMeasurements,
+  ],
+  any
+>;
+let spySendExceptionTelemetry: jest.SpyInstance<
+  void,
+  [
+    eventName: string,
+    properties?: TelemetryEventProperties,
+    measurements?: TelemetryEventMeasurements,
+  ],
+  any
+>;
 jest.mock("@vscode/extension-telemetry");
 
 function runScenario(
-  expectedNumberOfCalls,
+  expectedNumberOfCalls: number,
   eventType: string,
   eventName?: string,
   categories?: string[],

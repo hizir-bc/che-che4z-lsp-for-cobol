@@ -41,17 +41,19 @@ export async function activate() {
 }
 
 export function getWorkspacePath(): string {
-  return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  if (vscode.workspace.workspaceFolders)
+    return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  else throw new Error("Workspace folder does not exist");
 }
 
 export function get_editor(workspace_file: string): vscode.TextEditor {
   const editor = vscode.window.activeTextEditor;
-  assert.equal(
-    editor.document.uri.fsPath,
+  assert.strictEqual(
+    editor?.document.uri.fsPath,
     path.join(getWorkspacePath(), workspace_file),
   );
 
-  return editor;
+  return editor!;
 }
 
 export async function getUri(workspace_file: string): Promise<vscode.Uri> {
@@ -72,7 +74,7 @@ export async function showDocument(workspace_file: string) {
 
 export async function closeActiveEditor() {
   const doc = vscode.window.activeTextEditor;
-  while (doc.document.isDirty) {
+  while (doc?.document.isDirty) {
     await vscode.commands.executeCommand("undo");
     await sleep(100);
   }

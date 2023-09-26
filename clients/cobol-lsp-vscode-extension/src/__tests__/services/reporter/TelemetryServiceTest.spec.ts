@@ -59,14 +59,14 @@ function runScenario(
 ) {
   if (eventType === "log") {
     TelemetryService.registerEvent(
-      eventName,
+      eventName!,
       categories,
       undefined,
       telemetryMeasurements,
     );
     expect(spySendTelemetry).toBeCalledTimes(expectedNumberOfCalls);
   } else {
-    TelemetryService.registerExceptionEvent(eventName, rootCause, categories);
+    TelemetryService.registerExceptionEvent(eventName, rootCause!, categories);
     expect(spySendExceptionTelemetry).toBeCalledTimes(expectedNumberOfCalls);
   }
 }

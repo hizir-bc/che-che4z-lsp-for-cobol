@@ -422,7 +422,7 @@ export function getRule(
   let rule = tabSettings.defaultRule;
   if (line > 0 && tabSettings.rules.length > 0) {
     line -= 1;
-    const regexps = tabSettings.rules.map((r) => new RegExp(r.regex));
+    const regexps = tabSettings.rules.map((r: any) => new RegExp(r.regex));
 
     while (line >= 0) {
       let str = getCurrentLine(editor, line);

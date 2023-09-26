@@ -325,7 +325,7 @@ export class SettingsService {
    * Gets list of desired fialects
    * @returns a list of desired fialects
    */
-  public static getDialects(): string[] {
+  public static getDialects(): string[] | undefined {
     return vscode.workspace.getConfiguration().get(SETTINGS_DIALECT);
   }
 
@@ -334,7 +334,7 @@ export class SettingsService {
    *
    * @returns returns configured runtime
    */
-  public static serverRuntime(): string {
+  public static serverRuntime(): string | undefined {
     return vscode.workspace.getConfiguration().get(SERVER_RUNTIME);
   }
 

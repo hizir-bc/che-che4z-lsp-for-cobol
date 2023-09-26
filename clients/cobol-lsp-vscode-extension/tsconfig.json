@@ -23,7 +23,8 @@
     "outDir": "out",
     "sourceMap": true,
     "resolveJsonModule": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strictNullChecks": true
   },
   "exclude": ["node_modules", "server", ".vscode-test"]
 }

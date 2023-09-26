@@ -22,7 +22,7 @@ export class SettingsUtils {
     fsPath: boolean | undefined = undefined,
   ): string[] {
     const result: string[] = [];
-    vscode.workspace.workspaceFolders.forEach((workspaceFolder) => {
+    vscode.workspace.workspaceFolders?.forEach((workspaceFolder) => {
       result.push(
         fsPath === undefined
           ? workspaceFolder.uri.path

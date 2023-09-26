@@ -104,8 +104,8 @@ export class TelemetryService {
     telemetryEvent.eventName = eventName;
     telemetryEvent.categories = this.resolveCategories(categories);
     telemetryEvent.notes = notes;
-    telemetryEvent.rootCause = rootCause;
-    telemetryEvent.measurements = telemetryMeasurement;
+    telemetryEvent.rootCause = rootCause!;
+    telemetryEvent.measurements = telemetryMeasurement!;
 
     return telemetryEvent;
   }

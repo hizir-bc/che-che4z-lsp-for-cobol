@@ -45,9 +45,11 @@ export class TelemetryReporterImpl implements TelemetryReport {
   }
 
   private static getTelemetryResourcePath() {
-    const extPath = vscode.extensions.getExtension(EXTENSION_ID).extensionPath;
-    return vscode.Uri.file(path.join(extPath, "resources", "TELEMETRY_KEY"))
-      .fsPath;
+    const extPath = vscode.extensions.getExtension(EXTENSION_ID);
+    if (!extPath) throw new Error("Extension path could not find");
+    return vscode.Uri.file(
+      path.join(extPath?.extensionPath, "resources", "TELEMETRY_KEY"),
+    ).fsPath;
   }
 
   private static getInstrumentationKey(): string {

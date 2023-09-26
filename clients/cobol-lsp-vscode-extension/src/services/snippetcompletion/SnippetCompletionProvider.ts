@@ -180,7 +180,7 @@ export async function pickSnippet() {
       const getKey = mapKeyForSelectedSnippet.get(item.label);
       const snippetString = snippetMapsFromSettings.get(getKey);
       const snippet = new vscode.SnippetString(snippetString.body.join("\n"));
-      editor.insertSnippet(snippet);
+      editor?.insertSnippet(snippet);
     });
     input.show();
   } catch (error) {

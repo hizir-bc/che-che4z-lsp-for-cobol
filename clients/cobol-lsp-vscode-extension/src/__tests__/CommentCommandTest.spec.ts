@@ -177,7 +177,7 @@ describe("Validate ToggleComments", () => {
   // selection[3]
   // 25:      d  debug command
 
-  const documentLines = {
+  const documentLines: any = {
     5: {
       text: "       01  WS-POINT.",
       range: getRange(5, 0, 5, 20),

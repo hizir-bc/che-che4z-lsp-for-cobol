@@ -110,7 +110,7 @@ export function loadProcessorGroupDialectConfig(
   configObject: unknown,
 ): unknown {
   try {
-    const pgCfg: any = loadProcessorsConfig(item.scopeUri);
+    const pgCfg = loadProcessorsConfig(item.scopeUri);
     if (pgCfg === undefined) {
       return configObject;
     }
@@ -119,11 +119,10 @@ export function loadProcessorGroupDialectConfig(
       dialects.push(pgCfg.preprocessor);
     } else {
       for (const pp of pgCfg.preprocessor) {
-        if (typeof pp === "object" && pp) {
-          dialects.push(pp["name"]);
-        }
-        if (typeof pp === "string" && pp) {
+        if (typeof pp === "string") {
           dialects.push(pp);
+        } else {
+          dialects.push(pp["name"]);
         }
       }
     }
@@ -143,7 +142,12 @@ type ProgramsConfig = {
   }[];
 };
 
-type Preprocessor = string | string[];
+type Preprocessor =
+  | string
+  | {
+      name: string;
+      libs: string[];
+    };
 
 type ProcessorConfig = {
   name: string;
@@ -239,17 +243,21 @@ function loadProcessorsConfig(
 
 function loadProcessorGroupSettings<T>(
   scopeUri: string,
-  atrtibute: string,
+  atrtibute: "name" | "libs",
   configObject: T,
   dialect: string = "COBOL",
-): T | undefined {
+): T {
   try {
-    const pgCfg: any = loadProcessorsConfig(scopeUri);
+    const pgCfg = loadProcessorsConfig(scopeUri);
     if (pgCfg === undefined) {
       return configObject;
     }
 
-    if (dialect && dialect !== "COBOL") {
+    if (dialect && dialect == "COBOL") {
+      if (pgCfg[atrtibute]) {
+        return pgCfg[atrtibute] as any;
+      }
+    } else {
       for (const pp of pgCfg.preprocessor) {
         if (
           pp &&
@@ -257,12 +265,9 @@ function loadProcessorGroupSettings<T>(
           pp["name"] === dialect &&
           pp[atrtibute]
         ) {
-          return pp[atrtibute];
+          const a = pp[atrtibute];
+          return pp[atrtibute] as any;
         }
-      }
-    } else {
-      if (pgCfg[atrtibute]) {
-        return pgCfg[atrtibute];
       }
     }
 

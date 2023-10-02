@@ -24,5 +24,5 @@ import { SettingsService } from "../Settings";
  */
 export function resolveSubroutineURI(name: string): string {
   const folders: string[] = SettingsService.getSubroutineLocalPath();
-  return searchCopybookInWorkspace(name, folders, COBOL_EXT_ARRAY) as any;
+  return searchCopybookInWorkspace(name, folders, COBOL_EXT_ARRAY);
 }

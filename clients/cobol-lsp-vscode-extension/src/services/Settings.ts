@@ -276,7 +276,7 @@ export class SettingsService {
         settings = new TabSettings([], tabRule);
       }
     } else if (typeof config === "object") {
-      const obj = config as { default: number[]; anchors: any };
+      const obj = config as { default: number[]; anchors: unknown };
       let defaultRule = new TabRule([0, 6, 7, 11], 72);
       const stops = obj.default as number[];
       if (stops !== undefined && stops.length > 0) {
@@ -325,7 +325,7 @@ export class SettingsService {
    * Gets list of desired fialects
    * @returns a list of desired fialects
    */
-  public static getDialects(): string[] | undefined {
+  public static getDialects(): string[] {
     return vscode.workspace.getConfiguration().get(SETTINGS_DIALECT);
   }
 
@@ -334,7 +334,7 @@ export class SettingsService {
    *
    * @returns returns configured runtime
    */
-  public static serverRuntime(): string | undefined {
+  public static serverRuntime(): string {
     return vscode.workspace.getConfiguration().get(SERVER_RUNTIME);
   }
 

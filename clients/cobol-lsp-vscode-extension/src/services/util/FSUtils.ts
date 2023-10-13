@@ -34,7 +34,7 @@ export function getURIFrom(
   folder: string,
   entityName: string,
   extensions?: string[],
-): urlUtil.URL {
+): urlUtil.URL | undefined {
   if (!extensions) {
     const url = new urlUtil.URL(path.join(folder, entityName));
     if (existsSync(url)) {
@@ -106,7 +106,7 @@ export function searchCopybookInWorkspace(
       }
     }
   }
-  return undefined;
+  throw new Error("???????????");
 }
 
 export const backwardSlashRegex = new RegExp("\\\\", "g");

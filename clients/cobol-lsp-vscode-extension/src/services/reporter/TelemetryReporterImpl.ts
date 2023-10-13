@@ -98,7 +98,7 @@ export class TelemetryReporterImpl implements TelemetryReport {
       this.reporter.sendTelemetryEvent(
         content.eventName,
         TelemetryReporterImpl.convertData(content),
-        TelemetryReporterImpl.convertMeasurements(content.measurements),
+        content.measurements,
       );
     }
   }

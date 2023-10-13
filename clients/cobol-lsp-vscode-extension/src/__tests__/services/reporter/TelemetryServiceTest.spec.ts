@@ -55,7 +55,7 @@ function runScenario(
   eventName?: string,
   categories?: string[],
   rootCause?: string,
-  telemetryMeasurements?: Map<string, number>,
+  telemetryMeasurements?: TelemetryEventMeasurements,
 ) {
   if (eventType === "log") {
     TelemetryService.registerEvent(
@@ -100,17 +100,12 @@ describe("TelemetryService information are consistent before send them to the te
 
   test("Given a fulfilled telemetry measurement event, the data is contained as part of a telemetry event and their data are sent to the telemetry server", () => {
     const startTime: number = Date.now();
-    runScenario(
-      1,
-      "log",
-      "test the download",
-      undefined,
-      undefined,
-      new Map().set(
-        "time elapsed",
-        TelemetryService.calculateTimeElapsed(startTime - 100, startTime),
-      ),
-    );
+    runScenario(1, "log", "test the download", undefined, undefined, {
+      "time elapsed": TelemetryService.calculateTimeElapsed(
+        startTime - 100,
+        startTime,
+      )!,
+    });
   });
 
   test("An empty telemetry object is not sent to the telemetry server", () => {

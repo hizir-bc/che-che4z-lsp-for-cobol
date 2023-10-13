@@ -24,7 +24,7 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "noImplicitAny": true,
-    "strictNullChecks": false
+    "strictNullChecks": true
   },
   "exclude": ["node_modules", "server", ".vscode-test"]
 }

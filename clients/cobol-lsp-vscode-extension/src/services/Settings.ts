@@ -175,7 +175,7 @@ export class SettingsService {
   public static getSubroutineLocalPath(): string[] {
     return vscode.workspace
       .getConfiguration()
-      .get(SETTINGS_SUBROUTINE_LOCAL_KEY);
+      .get(SETTINGS_SUBROUTINE_LOCAL_KEY)!;
   }
 
   /**
@@ -207,7 +207,7 @@ export class SettingsService {
   public static getCopybookExtension(documentUri: string): string[] {
     const global: string[] = vscode.workspace
       .getConfiguration(SETTINGS_CPY_SECTION)
-      .get(COPYBOOK_EXTENSIONS);
+      .get(COPYBOOK_EXTENSIONS)!;
     return documentUri === undefined
       ? global
       : loadProcessorGroupCopybookExtensionsConfig(
@@ -220,8 +220,8 @@ export class SettingsService {
    * Get Lsp Port from configuration
    * @returns lsp port number
    */
-  public static getLspPort(): number | undefined {
-    return +vscode.workspace.getConfiguration().get(SERVER_PORT);
+  public static getLspPort(): number {
+    return +(vscode.workspace.getConfiguration().get(SERVER_PORT) as number);
   }
 
   /**
@@ -259,7 +259,7 @@ export class SettingsService {
   public static getProfileName(): string {
     return vscode.workspace
       .getConfiguration(SETTINGS_CPY_SECTION)
-      .get("profiles");
+      .get("profiles") as string;
   }
 
   /**
@@ -276,7 +276,7 @@ export class SettingsService {
         settings = new TabSettings([], tabRule);
       }
     } else if (typeof config === "object") {
-      const obj = config as { default: number[]; anchors: unknown };
+      const obj = config as { default: number[]; anchors: unknown[] };
       let defaultRule = new TabRule([0, 6, 7, 11], 72);
       const stops = obj.default as number[];
       if (stops !== undefined && stops.length > 0) {
@@ -326,7 +326,9 @@ export class SettingsService {
    * @returns a list of desired fialects
    */
   public static getDialects(): string[] {
-    return vscode.workspace.getConfiguration().get(SETTINGS_DIALECT);
+    return vscode.workspace
+      .getConfiguration()
+      .get(SETTINGS_DIALECT) as string[];
   }
 
   /**
@@ -335,7 +337,7 @@ export class SettingsService {
    * @returns returns configured runtime
    */
   public static serverRuntime(): string {
-    return vscode.workspace.getConfiguration().get(SERVER_RUNTIME);
+    return vscode.workspace.getConfiguration().get(SERVER_RUNTIME) as string;
   }
 
   private static evaluateVariable(
@@ -361,7 +363,7 @@ export class SettingsService {
     if (dialectType !== SettingsService.DEFAULT_DIALECT) {
       const pathList: string[] = vscode.workspace
         .getConfiguration(SETTINGS_CPY_SECTION)
-        .get(`${dialectType.toLowerCase()}.${section}`);
+        .get(`${dialectType.toLowerCase()}.${section}`)!;
       return SettingsService.evaluateVariable(
         pathList,
         "fileBasenameNoExtension",
@@ -370,7 +372,7 @@ export class SettingsService {
     }
     const pathList: string[] = vscode.workspace
       .getConfiguration(SETTINGS_CPY_SECTION)
-      .get(section);
+      .get(section)!;
     return SettingsService.evaluateVariable(
       pathList,
       "fileBasenameNoExtension",

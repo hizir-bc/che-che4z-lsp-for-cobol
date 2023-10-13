@@ -20,6 +20,7 @@ import {
   SettingsService,
 } from "../../services/Settings";
 import { SettingsUtils } from "../../services/util/SettingsUtils";
+import { Utils } from "../../services/util/Utils";
 
 const fsPath = "tmp-ws";
 let wsPath: string;
@@ -30,7 +31,7 @@ beforeAll(() => {
   (vscode.workspace.workspaceFolders as any) = [
     { uri: { fsPath, path: fsPath } } as any,
   ];
-  wsPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath);
+  wsPath = path.join(Utils.getFsPath());
   c4zPath = path.join(wsPath, C4Z_FOLDER);
   filePath = path.join(c4zPath, GITIGNORE_FILE);
 });
@@ -81,7 +82,7 @@ describe(".gitignore file in .c4z folder tests", () => {
     createFileWithGivenPath(C4Z_FOLDER, GITIGNORE_FILE, "/**");
 
     expect(createFile).toHaveBeenCalledTimes(0);
-    expect(vscode.workspace.workspaceFolders[0]).toBe(undefined);
+    expect(vscode.workspace.workspaceFolders).toBe(undefined);
   });
 });
 
@@ -214,7 +215,7 @@ describe("SettingsService returns correct Copybook Configuration Values", () => 
   test("returns empty array when dialect configuration is not provided", () => {
     vscode.workspace.getConfiguration = mockConfigurationFetch(
       "dialect.paths-uss",
-      undefined,
+      [],
     );
     expect(SettingsService.getUssPath("doc-uri", "dialect")).toHaveLength(0);
   });

@@ -88,14 +88,14 @@ function importSnippet(snippetPath: string): Map<any, any> {
       console.log(e);
     }
   }
-  return result;
+  return result!;
 }
 
 function createCompletionItem(
   value: any,
   key: string,
   position: vscode.Position,
-  document?: vscode.TextDocument,
+  document: vscode.TextDocument,
 ): vscode.CompletionItem {
   const itemLabel: vscode.CompletionItemLabel = {
     label: value.prefix,
@@ -136,7 +136,7 @@ function getCurrentLineText(
 
 function findPosition(
   position: vscode.Position,
-  document?: vscode.TextDocument,
+  document: vscode.TextDocument,
 ) {
   const lineText = document.lineAt(position).text.slice(0, position.character);
   var charPosition: number = 7;

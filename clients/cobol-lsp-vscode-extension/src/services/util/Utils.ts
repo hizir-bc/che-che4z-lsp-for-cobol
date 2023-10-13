@@ -36,6 +36,12 @@ export class Utils {
       return Promise.resolve(undefined) as any;
     }
     await ext.activate();
-    return ext.exports as any;
+    return ext.exports;
+  }
+
+  public static getFsPath(): string {
+    return vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
   }
 }

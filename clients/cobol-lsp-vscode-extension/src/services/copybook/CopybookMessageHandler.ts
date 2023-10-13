@@ -69,7 +69,7 @@ function searchCopybook(
       return result;
     }
   }
-  return result;
+  return result!;
 }
 
 function getTargetFolderForCopybook(
@@ -77,7 +77,7 @@ function getTargetFolderForCopybook(
   documentUri: string,
   dialectType: string,
 ) {
-  let result: string[];
+  let result: string[] = [];
   switch (folderKind) {
     case CopybookFolderKind[CopybookFolderKind.local]:
       result = SettingsService.getCopybookLocalPath(documentUri, dialectType);
@@ -101,7 +101,7 @@ function getTargetFolderForCopybook(
       );
       break;
   }
-  return result || [];
+  return result;
 }
 
 function resolveAllowedExtensions(

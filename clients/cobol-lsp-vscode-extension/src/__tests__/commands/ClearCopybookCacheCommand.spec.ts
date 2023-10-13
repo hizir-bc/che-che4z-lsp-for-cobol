@@ -16,15 +16,12 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { clearCache } from "../../commands/ClearCopybookCacheCommand";
 import { C4Z_FOLDER, COPYBOOKS_FOLDER } from "../../constants";
+import { Utils } from "../../services/util/Utils";
 
 const fsPath = "tmp-ws";
 
 let copybookCachePath: string;
-const wsPath = path.join(
-  vscode.workspace.workspaceFolders[0].uri.fsPath,
-  C4Z_FOLDER,
-  COPYBOOKS_FOLDER,
-);
+const wsPath = path.join(Utils.getFsPath(), C4Z_FOLDER, COPYBOOKS_FOLDER);
 
 jest.mock("vscode", () => ({
   Uri: {

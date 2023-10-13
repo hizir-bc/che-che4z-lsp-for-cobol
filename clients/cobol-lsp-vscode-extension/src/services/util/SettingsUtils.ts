@@ -14,7 +14,7 @@
 import * as vscode from "vscode";
 
 export class SettingsUtils {
-  public static isValidJSON(json: string): boolean {
+  public static isValidJSON(json: string | undefined): boolean {
     return json !== undefined ? JSON.parse(json) : false;
   }
 

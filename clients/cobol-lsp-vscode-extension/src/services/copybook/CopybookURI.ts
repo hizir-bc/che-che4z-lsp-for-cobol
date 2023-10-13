@@ -20,6 +20,7 @@ import {
   searchCopybookInWorkspace,
 } from "../util/FSUtils";
 import { ProfileUtils } from "../util/ProfileUtils";
+import { Utils } from "../util/Utils";
 
 /**
  * This class is responsible to identify from which source resolve copybooks required by the server.
@@ -70,9 +71,8 @@ export class CopybookURI {
     dataset: string,
     copybook: string,
   ): string {
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const copybookDirPath = path.join(
-      rootPath,
+      Utils.getFsPath(),
       C4Z_FOLDER,
       COPYBOOKS_FOLDER,
       profileName,
@@ -85,9 +85,8 @@ export class CopybookURI {
     profileName: string,
     dataset: string,
   ): string {
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     return path.join(
-      rootPath,
+      Utils.getFsPath(),
       C4Z_FOLDER,
       COPYBOOKS_FOLDER,
       profileName,

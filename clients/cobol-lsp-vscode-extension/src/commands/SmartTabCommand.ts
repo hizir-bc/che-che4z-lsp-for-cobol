@@ -175,6 +175,7 @@ export class SmartOutdentCommandProvider extends SmartCommandProvider {
     const result: Selection[] = new Array();
     for (let selection of rangeSelection) {
       let { lastShift, lastShifts } = this.getlastShift(editor);
+      if (!lastShift || !lastShifts) continue;
       for (
         let lineNumber = selection.start.line;
         lineNumber <= selection.end.line;
@@ -189,7 +190,7 @@ export class SmartOutdentCommandProvider extends SmartCommandProvider {
             lastShifts.length > 0
           ) {
             lastShift = this.getlastShift(editor).lastShift;
-            shift = lastShift.get(currentLine.lineNumber) || 0;
+            shift = lastShift ? lastShift.get(currentLine.lineNumber) || 0 : 0;
           }
           edit.delete(
             new vscode.Range(
@@ -421,7 +422,7 @@ export function getRule(
   let rule = tabSettings.defaultRule;
   if (line > 0 && tabSettings.rules.length > 0) {
     line -= 1;
-    const regexps = tabSettings.rules.map((r) => new RegExp(r.regex));
+    const regexps = tabSettings.rules.map((r: any) => new RegExp(r.regex));
 
     while (line >= 0) {
       let str = getCurrentLine(editor, line);

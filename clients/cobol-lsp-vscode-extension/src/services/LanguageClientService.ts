@@ -113,9 +113,7 @@ export class LanguageClientService {
   }
 
   public stop(): Thenable<void> {
-    if (this.languageClient) {
-      return this.getLanguageClient().stop();
-    }
+    return this.getLanguageClient()?.stop();
   }
 
   private getLanguageClient() {

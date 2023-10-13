@@ -45,7 +45,10 @@ export class CopybookName {
 const experimentTag = "experiment-tag";
 export class CopybookDownloadService implements vscode.Disposable {
   public static checkWorkspace(): boolean {
-    if (vscode.workspace.workspaceFolders.length === 0) {
+    if (
+      vscode.workspace.workspaceFolders &&
+      vscode.workspace.workspaceFolders.length === 0
+    ) {
       vscode.window.showErrorMessage("No workspace folder opened.");
       return false;
     }
@@ -455,7 +458,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   public async start() {
-    let startTime: number | null = null;
+    const startTime = Date.now();
     const errors = new Set<string>();
     while (true) {
       const element: CopybookProfile | undefined = await this.queue.pop();
@@ -463,10 +466,7 @@ export class CopybookDownloadService implements vscode.Disposable {
         // undefined element means that service is disposed
         return;
       }
-      if (startTime === null) {
-        startTime = Date.now();
-      }
-      startTime = await this.run(element, errors, startTime);
+      await this.run(element, errors, startTime);
     }
   }
 
@@ -493,12 +493,13 @@ export class CopybookDownloadService implements vscode.Disposable {
           "Download copybooks from MF",
           ["copybook", "COBOL", experimentTag],
           "total time to search copybooks on MF",
-          new Map().set(
-            "time elapsed",
-            TelemetryService.calculateTimeElapsed(startTime, Date.now()),
-          ),
+          {
+            ["time elapsed"]: TelemetryService.calculateTimeElapsed(
+              startTime,
+              Date.now(),
+            ),
+          },
         );
-        startTime = null;
       }
     }
   }
@@ -517,7 +518,6 @@ export class CopybookDownloadService implements vscode.Disposable {
         progress: vscode.Progress<{ message?: string; increment?: number }>,
       ) => this.process(progress, element, errors, startTime),
     );
-    return startTime;
   }
 
   private async handleQueue(

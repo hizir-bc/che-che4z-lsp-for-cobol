@@ -15,8 +15,9 @@
 import * as assert from "assert";
 import * as helper from "./testHelper";
 import * as vscode from "vscode";
-import { getWorkspacePath, pos, range } from "./testHelper";
+import { getHomeFolder, pos, range } from "./testHelper";
 import * as path from "path";
+import { C4Z_FOLDER, ZOWE_FOLDER } from "../../constants";
 
 suite("Integration Test Suite: Copybooks", function () {
   suiteSetup(async function () {
@@ -172,7 +173,12 @@ suite("Integration Test Suite: Copybooks", function () {
     .slow(1000);
 
   test("TC247497 - Local Copybooks - check hidden folders under c4z", async () => {
-    const extSrcPath = path.join(getWorkspacePath(), ".c4z", ".extsrcs");
+    const extSrcPath = path.join(
+      getHomeFolder(),
+      C4Z_FOLDER,
+      ZOWE_FOLDER,
+      ".extsrcs",
+    );
     const extSrcUri = vscode.Uri.file(extSrcPath);
     const hiddenFolder = vscode.workspace.getWorkspaceFolder(extSrcUri);
     assert.ok(hiddenFolder !== undefined);

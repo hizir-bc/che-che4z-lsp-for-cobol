@@ -15,8 +15,9 @@
 import * as assert from "assert";
 import * as helper from "./testHelper";
 import * as vscode from "vscode";
-import { getWorkspacePath, pos, range } from "./testHelper";
+import { getHomeFolder, pos, range } from "./testHelper";
 import * as path from "path";
+import { ZOWE_FOLDER } from "../../constants";
 
 suite("Integration Test Suite", function () {
   suiteSetup(async function () {
@@ -305,8 +306,8 @@ suite("Integration Test Suite", function () {
       const extSrcUser1FilePath = path.join(".c4z", ".extsrcs", "USER1.cbl");
       const user1FilePath = "USER1.cbl";
       helper.recursiveCopySync(
-        path.join(getWorkspacePath(), user1FilePath),
-        path.join(getWorkspacePath(), extSrcUser1FilePath),
+        path.join(getHomeFolder(), ZOWE_FOLDER, user1FilePath),
+        path.join(getHomeFolder(), ZOWE_FOLDER, extSrcUser1FilePath),
       );
 
       await helper.showDocument(extSrcUser1FilePath);

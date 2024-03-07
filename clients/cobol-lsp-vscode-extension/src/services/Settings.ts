@@ -45,6 +45,7 @@ import {
   loadProcessorGroupSqlBackendConfig,
 } from "./ProcessorGroups";
 import { getProgramNameFromUri } from "./util/FSUtils";
+import { Utils } from "./util/Utils";
 
 /**
  * New file (e.g .gitignore) will be created or edited if exits, under project folder
@@ -58,15 +59,11 @@ export function createFileWithGivenPath(
   fileName: string,
   pattern: string,
 ): void {
-  if (
-    !vscode.workspace.workspaceFolders ||
-    !vscode.workspace.workspaceFolders[0]
-  ) {
+  if (Utils.getC4ZHomeFolder()) {
     return;
   }
-  const ws = vscode.workspace.workspaceFolders[0];
 
-  const ch4zPath = path.join(ws.uri.fsPath, folderPath);
+  const ch4zPath = path.join(path.join(Utils.getC4ZHomeFolder(), folderPath));
   const filePath = path.join(ch4zPath, fileName);
   try {
     if (fs.existsSync(filePath)) {

@@ -13,6 +13,9 @@
  */
 
 import * as vscode from "vscode";
+import * as path from "path";
+import * as os from "os";
+import { C4Z_FOLDER } from "../../constants";
 
 /**
  * This class collects utility methods for general purpose activities
@@ -37,5 +40,9 @@ export class Utils {
     }
     await ext.activate();
     return ext.exports as any;
+  }
+
+  public static getC4ZHomeFolder() {
+    return path.join(os.homedir(), C4Z_FOLDER);
   }
 }

@@ -67,6 +67,7 @@ export const INSTALL_ZOWE = "Install Zowe Explorer";
 export const DEFAULT_DIALECT = "COBOL";
 export const CLEARING_COPYBOOK_CACHE = "Clearing downloaded copybook cache";
 export const COPYBOOK_CACHE_CLEARED_INFO = "Downloaded copybooks removed";
+export const ZOWE_FOLDER: string = ".zowe";
 
 export enum PUNCH_CARD {
   SEQUENCE_AREA_END_POS = 6,

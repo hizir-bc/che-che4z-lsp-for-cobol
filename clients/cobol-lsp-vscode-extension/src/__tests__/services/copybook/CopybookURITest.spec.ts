@@ -15,6 +15,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { CopybookURI } from "../../../services/copybook/CopybookURI";
 import { Utils } from "../../../services/util/Utils";
+import { ZOWE_FOLDER } from "../../../constants";
 
 Utils.getZoweExplorerAPI = jest.fn();
 
@@ -30,8 +31,7 @@ describe("CopybooksPathGenerator tests", () => {
     ).toEqual(
       path.join(
         "/",
-        "projects",
-        ".c4z",
+        path.join(Utils.getC4ZHomeFolder(), ZOWE_FOLDER),
         ".copybooks",
         "profile",
         "dataset",
@@ -41,7 +41,12 @@ describe("CopybooksPathGenerator tests", () => {
   });
   it("creates dataset path", () => {
     expect(CopybookURI.createDatasetPath(profile, dataset)).toEqual(
-      path.join("/projects", ".c4z", ".copybooks", "profile", "dataset"),
+      path.join(
+        path.join(Utils.getC4ZHomeFolder(), ZOWE_FOLDER),
+        ".copybooks",
+        "profile",
+        "dataset",
+      ),
     );
   });
 });

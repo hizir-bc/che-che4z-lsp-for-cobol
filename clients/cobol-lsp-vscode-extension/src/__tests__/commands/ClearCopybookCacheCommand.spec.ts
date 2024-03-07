@@ -13,22 +13,32 @@
  */
 
 import * as path from "path";
-import * as vscode from "vscode";
+import * as os from "os";
 import { clearCache } from "../../commands/ClearCopybookCacheCommand";
-import { C4Z_FOLDER, COPYBOOKS_FOLDER } from "../../constants";
-
-const fsPath = "tmp-ws";
-
-let copybookCachePath: string;
-const wsPath = path.join(
-  vscode.workspace.workspaceFolders[0].uri.fsPath,
-  C4Z_FOLDER,
-  COPYBOOKS_FOLDER,
-);
 
 jest.mock("vscode", () => ({
   Uri: {
     parse: jest.fn().mockReturnValue(path.join("tmp-ws", ".c4z", ".copybooks")),
+    file: jest.fn().mockReturnValue({
+      fsPath: path.join(os.homedir(), ".c4z", ".zowe"),
+      with: jest
+        .fn()
+        .mockImplementation(
+          (change: {
+            scheme?: string;
+            authority?: string;
+            path?: string;
+            query?: string;
+            fragment?: string;
+          }) => {
+            return {
+              path: change.path,
+              fsPath: change.path,
+              with: jest.fn().mockReturnValue({ path: change.path }),
+            };
+          },
+        ),
+    }),
   },
   window: {
     setStatusBarMessage: jest.fn().mockResolvedValue(true),

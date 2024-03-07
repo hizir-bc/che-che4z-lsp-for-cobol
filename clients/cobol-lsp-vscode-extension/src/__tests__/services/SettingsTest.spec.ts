@@ -14,12 +14,13 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
-import { C4Z_FOLDER, GITIGNORE_FILE } from "../../constants";
+import { GITIGNORE_FILE } from "../../constants";
 import {
   createFileWithGivenPath,
   SettingsService,
 } from "../../services/Settings";
 import { SettingsUtils } from "../../services/util/SettingsUtils";
+import { Utils } from "../../services/util/Utils";
 
 const fsPath = "tmp-ws";
 let wsPath: string;
@@ -30,14 +31,13 @@ beforeAll(() => {
   (vscode.workspace.workspaceFolders as any) = [
     { uri: { fsPath, path: fsPath } } as any,
   ];
-  wsPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath);
-  c4zPath = path.join(wsPath, C4Z_FOLDER);
+  c4zPath = path.join(Utils.getC4ZHomeFolder());
   filePath = path.join(c4zPath, GITIGNORE_FILE);
 });
 
 afterAll(() => {
-  if (fs.existsSync(wsPath)) {
-    fs.remove(wsPath);
+  if (fs.existsSync(c4zPath)) {
+    fs.remove(c4zPath);
   }
 });
 
@@ -54,16 +54,15 @@ jest.mock("vscode", () => ({
 
 describe(".gitignore file in .c4z folder tests", () => {
   it("Create .gitignore file if not exists", () => {
-    createFileWithGivenPath(C4Z_FOLDER, GITIGNORE_FILE, "/**");
+    createFileWithGivenPath("", GITIGNORE_FILE, "/**");
 
-    expect(fs.existsSync(wsPath)).toEqual(true);
     expect(fs.existsSync(c4zPath)).toEqual(true);
     expect(fs.existsSync(filePath)).toEqual(true);
   });
 
   it("Modify .gitignore file if exists", () => {
     const pattern = "srs/*\n.sds/*";
-    createFileWithGivenPath(C4Z_FOLDER, GITIGNORE_FILE, pattern);
+    createFileWithGivenPath("", GITIGNORE_FILE, pattern);
     const found = fs
       .readFileSync(filePath)
       .toString()
@@ -78,7 +77,7 @@ describe(".gitignore file in .c4z folder tests", () => {
   it("workspace not exist", () => {
     (vscode.workspace.workspaceFolders as any) = [];
     const createFile = jest.fn();
-    createFileWithGivenPath(C4Z_FOLDER, GITIGNORE_FILE, "/**");
+    createFileWithGivenPath("", GITIGNORE_FILE, "/**");
 
     expect(createFile).toHaveBeenCalledTimes(0);
     expect(vscode.workspace.workspaceFolders[0]).toBe(undefined);

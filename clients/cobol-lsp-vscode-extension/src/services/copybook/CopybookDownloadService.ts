@@ -14,10 +14,9 @@
 
 import * as fs from "node:fs";
 import * as iconv from "iconv-lite";
-import * as Path from "node:path";
+import * as path from "path";
 import * as vscode from "vscode";
 import {
-  C4Z_FOLDER,
   DOWNLOAD_QUEUE_LOCKED_ERROR_MSG,
   GITIGNORE_FILE,
   INSTALL_ZOWE,
@@ -30,6 +29,7 @@ import {
   SETTINGS_CPY_SECTION,
   UNLOCK_DOWNLOAD_QUEUE_MSG,
   ZOWE_EXT_MISSING_MSG,
+  ZOWE_FOLDER,
 } from "../../constants";
 import { TelemetryService } from "../reporter/TelemetryService";
 import { createFileWithGivenPath, SettingsService } from "../Settings";
@@ -45,7 +45,7 @@ export class CopybookName {
 const experimentTag = "experiment-tag";
 export class CopybookDownloadService implements vscode.Disposable {
   public static checkWorkspace(): boolean {
-    if (vscode.workspace.workspaceFolders.length === 0) {
+    if (!path.join(Utils.getC4ZHomeFolder(), ZOWE_FOLDER)) {
       vscode.window.showErrorMessage("No workspace folder opened.");
       return false;
     }
@@ -181,7 +181,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     if (!fs.existsSync(copybookPath)) {
       try {
         // create .gitignore file within .c4z folder
-        createFileWithGivenPath(C4Z_FOLDER, GITIGNORE_FILE, "/**");
+        createFileWithGivenPath("", GITIGNORE_FILE, "/**");
         await CopybookDownloadService.downloadCopybookContent(
           dataset,
           copybookprofile.getCopybook(),
@@ -208,7 +208,7 @@ export class CopybookDownloadService implements vscode.Disposable {
       .getProfilesCache()
       .loadNamedProfile(profileName);
     const downloadBinary = !!SettingsService.getCopybookFileEncoding();
-    const filePath = Path.join(
+    const filePath = path.join(
       CopybookURI.createDatasetPath(profileName, dataset),
       copybook.substring(
         0,

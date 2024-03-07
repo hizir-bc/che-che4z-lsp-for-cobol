@@ -12,14 +12,14 @@
  *   Broadcom, Inc. - initial API and implementation
  */
 import * as path from "node:path";
-import * as vscode from "vscode";
-import { C4Z_FOLDER, COPYBOOKS_FOLDER } from "../../constants";
+import { C4Z_FOLDER, COPYBOOKS_FOLDER, ZOWE_FOLDER } from "../../constants";
 import { SettingsService } from "../Settings";
 import {
   getProgramNameFromUri,
   searchCopybookInWorkspace,
 } from "../util/FSUtils";
 import { ProfileUtils } from "../util/ProfileUtils";
+import { Utils } from "../util/Utils";
 
 /**
  * This class is responsible to identify from which source resolve copybooks required by the server.
@@ -70,14 +70,12 @@ export class CopybookURI {
     dataset: string,
     copybook: string,
   ): string {
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const copybookDirPath = path.join(
-      rootPath,
-      C4Z_FOLDER,
+    const rootPath = path.join(
+      Utils.getC4ZHomeFolder(),
+      ZOWE_FOLDER,
       COPYBOOKS_FOLDER,
-      profileName,
-      dataset,
     );
+    const copybookDirPath = path.join(rootPath, profileName, dataset);
     return path.join(copybookDirPath, copybook + ".cpy");
   }
 
@@ -85,14 +83,12 @@ export class CopybookURI {
     profileName: string,
     dataset: string,
   ): string {
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    return path.join(
-      rootPath,
-      C4Z_FOLDER,
+    const rootPath = path.join(
+      Utils.getC4ZHomeFolder(),
+      ZOWE_FOLDER,
       COPYBOOKS_FOLDER,
-      profileName,
-      dataset,
     );
+    return path.join(rootPath, profileName, dataset);
   }
   /**
    * This method produce an array with element that following the schema
@@ -118,7 +114,14 @@ export class CopybookURI {
       result.forEach(
         (value, index) =>
           (result[index] =
-            C4Z_FOLDER + "/" + COPYBOOKS_FOLDER + "/" + profile + "/" + value),
+            Utils.getC4ZHomeFolder() +
+            ZOWE_FOLDER +
+            "/" +
+            COPYBOOKS_FOLDER +
+            "/" +
+            profile +
+            "/" +
+            value),
       );
     }
 

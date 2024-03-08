@@ -16,6 +16,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
 import { C4Z_FOLDER } from "../../constants";
+import { IEndevorApiClient } from "../../type/endevorApi";
 
 /**
  * This class collects utility methods for general purpose activities
@@ -37,6 +38,20 @@ export class Utils {
     );
     if (!ext) {
       return Promise.resolve(undefined);
+    }
+    await ext.activate();
+    return ext.exports as any;
+  }
+
+  public static async getEndevorExplorerAPI(): Promise<IEndevorApiClient> {
+    const ext = vscode.extensions.getExtension(
+      "BroadcomMFD.explorer-for-endevor",
+    );
+
+    if (!ext) {
+      return Promise.resolve(
+        undefined,
+      ) as unknown as Promise<IEndevorApiClient>;
     }
     await ext.activate();
     return ext.exports as any;

@@ -37,6 +37,10 @@ import { ProfileUtils } from "../util/ProfileUtils";
 import { Utils } from "../util/Utils";
 import { CopybookURI } from "./CopybookURI";
 import { CopybookProfile, DownloadQueue } from "./DownloadQueue";
+import {
+  IEndevorApiClient,
+  ProcessorConfigurationType,
+} from "../../type/endevorApi.d";
 
 export class CopybookName {
   public constructor(public name: string, public dialect: string) {}
@@ -245,7 +249,7 @@ export class CopybookDownloadService implements vscode.Disposable {
         // Can be exposed later on as a setting.
         newContent = newContent.replace(/.{80}/g, `$&\n`);
       }
-      fs.writeFileSync(filePath, newContent);
+      this.writeFile(filePath, newContent);
     }
   }
 
@@ -584,5 +588,77 @@ export class CopybookDownloadService implements vscode.Disposable {
         vscode.window.showErrorMessage(errorMessage);
       }
     }
+  }
+
+  private static async downloadCopybooke4E() {
+    const endevorExplorerApi = await Utils.getEndevorExplorerAPI();
+    const uriString = vscode.window?.activeTextEditor?.document.uri.toString()!; //duzelt
+    const endProfile = await endevorExplorerApi.getProfileInfo(uriString);
+    const dataset = "dataset";
+    const environment = "environment";
+    const conf = await endevorExplorerApi.getConfiguration(uriString, {
+      compiler: "IGYCRCTL",
+      preProcessors: ["DSNHPC", "DFHECP1$"],
+      type: ProcessorConfigurationType.COBOL,
+    });
+
+    const copybookInfo = conf.pgroups[0].libs;
+
+    copybookInfo.forEach(async (element: any) => {
+      if (element[dataset]) {
+        await this.downloadDatasetE4e(element, endevorExplorerApi, endProfile);
+      } else if (false && element[environment]) {
+        await this.downloadElementE4e(element, endevorExplorerApi, endProfile);
+      }
+    });
+  }
+
+  private static async downloadElementE4e(
+    elementInfo: any,
+    endevorApi: IEndevorApiClient,
+    profile: any,
+  ) {
+    const elements: any = await endevorApi.listElements(profile, elementInfo);
+
+    elements.forEach(async (_element: any) => {
+      const element = await endevorApi.getElement(profile, _element);
+      const _path = this.getPath("endevorProfile", "ELEMENT", "TAHTA");
+      this.writeFile(_path, element);
+    });
+
+    return elements;
+  }
+
+  private static async downloadDatasetE4e(
+    ds: any,
+    endevorApi: IEndevorApiClient,
+    profile: any,
+  ) {
+    const members: any = await endevorApi.listMembers(profile, ds);
+
+    members.forEach(async (member: any) => {
+      const memberContent = await endevorApi.getMember(profile, {
+        dataset: ds["dataset"],
+        member: member,
+      });
+
+      const _path = this.getPath("endevorProfile", ds["dataset"], member);
+      this.writeFile(_path, memberContent);
+    });
+    return members;
+  }
+
+  private static writeFile(filePath, newContent) {
+    fs.writeFileSync(filePath, newContent);
+  }
+
+  private static getPath(profileName, dataset, copybook) {
+    return path.join(
+      CopybookURI.createDatasetPath(profileName, dataset),
+      copybook.substring(
+        0,
+        copybook.indexOf(".") !== -1 ? copybook.indexOf(".") : copybook.length,
+      ),
+    );
   }
 }

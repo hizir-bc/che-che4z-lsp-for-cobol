@@ -646,14 +646,14 @@ export class CopybookDownloadService implements vscode.Disposable {
     profile: any,
   ) {
     const members: any = await endevorApi.listMembers(profile, ds);
-
+    const _folder: string = this.getFolder("endevorProfile", ds["dataset"]);
     members.forEach(async (member: any) => {
       const memberContent = await endevorApi.getMember(profile, {
         dataset: ds["dataset"],
         member: member,
       });
 
-      const _path = this.getPath("endevorProfile", ds["dataset"], member);
+      const _path = this.getPath(_folder, member);
       this.writeFile(_path, memberContent);
     });
     return members;
@@ -663,14 +663,24 @@ export class CopybookDownloadService implements vscode.Disposable {
     fs.writeFileSync(filePath, newContent);
   }
 
-  private static getPath(profileName, dataset, copybook) {
-    let e4ePath = path.join(
-      CopybookURI.createDatasetPath(profileName, dataset, E4E_FOLDER),
+  private static getPath(folder, copybook) {
+    return path.join(
+      folder,
       copybook.substring(
         0,
         copybook.indexOf(".") !== -1 ? copybook.indexOf(".") : copybook.length,
       ),
     );
-    return e4ePath;
+  }
+
+  private static getFolder(profileName, dataset): string {
+    const folder = CopybookURI.createDatasetPath(
+      profileName,
+      dataset,
+      E4E_FOLDER,
+    );
+    if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+
+    return folder;
   }
 }

@@ -30,6 +30,8 @@ import { JavaCheck } from "./JavaCheck";
 import { NativeExecutableService } from "./nativeLanguageClient/nativeExecutableService";
 import { TelemetryService } from "./reporter/TelemetryService";
 import { SettingsService } from "./Settings";
+import { Utils } from "./util/Utils";
+import path = require("node:path");
 
 const extensionId = "BroadcomMFD.cobol-language-support";
 
@@ -138,7 +140,12 @@ export class LanguageClientService {
         fileEvents: [
           vscode.workspace.createFileSystemWatcher("**/pgm_conf.json"),
           vscode.workspace.createFileSystemWatcher("**/proc_grps.json"),
-          vscode.workspace.createFileSystemWatcher("**/.copybooks/**/*"),
+          vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(
+              vscode.Uri.file(Utils.getC4ZHomeFolder()),
+              "**/*",
+            ),
+          ),
         ],
       },
     };

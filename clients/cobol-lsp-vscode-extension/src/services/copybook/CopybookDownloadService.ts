@@ -18,6 +18,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import {
   DOWNLOAD_QUEUE_LOCKED_ERROR_MSG,
+  E4E_FOLDER,
   GITIGNORE_FILE,
   INSTALL_ZOWE,
   INVALID_CREDENTIALS_ERROR_MSG,
@@ -101,34 +102,44 @@ export class CopybookDownloadService implements vscode.Disposable {
     isUSS: boolean,
   ): Promise<boolean> {
     let members: string[] = [];
-    try {
-      members = await CopybookDownloadService.getAllMembers(
+
+    if (
+      !vscode.window?.activeTextEditor?.document.uri
+        .toString()
+        .startsWith("ndvr")
+    ) {
+      try {
+        members = await CopybookDownloadService.getAllMembers(
+          dataset,
+          copybookProfile.profile,
+          isUSS,
+        );
+      } catch (error) {
+        if (CopybookDownloadService.isInvalidCredentials(error)) {
+          throw error;
+        }
+        if (!copybookProfile.quiet) {
+          vscode.window.showErrorMessage(error.message);
+        }
+        return false;
+      }
+      const remoteCopybook = CopybookDownloadService.getRemoteCopybookName(
+        members,
+        copybookProfile.getCopybook(),
+      );
+      if (!remoteCopybook) {
+        return false;
+      }
+      copybookProfile.updateCopybook(remoteCopybook);
+      await CopybookDownloadService.downloadCopybookFromMFUsingZowe(
         dataset,
-        copybookProfile.profile,
+        copybookProfile,
         isUSS,
       );
-    } catch (error) {
-      if (CopybookDownloadService.isInvalidCredentials(error)) {
-        throw error;
-      }
-      if (!copybookProfile.quiet) {
-        vscode.window.showErrorMessage(error.message);
-      }
-      return false;
+    } else {
+      this.downloadCopybooke4E();
     }
-    const remoteCopybook = CopybookDownloadService.getRemoteCopybookName(
-      members,
-      copybookProfile.getCopybook(),
-    );
-    if (!remoteCopybook) {
-      return false;
-    }
-    copybookProfile.updateCopybook(remoteCopybook);
-    await CopybookDownloadService.downloadCopybookFromMFUsingZowe(
-      dataset,
-      copybookProfile,
-      isUSS,
-    );
+
     return true;
   }
 
@@ -653,12 +664,13 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static getPath(profileName, dataset, copybook) {
-    return path.join(
-      CopybookURI.createDatasetPath(profileName, dataset),
+    let e4ePath = path.join(
+      CopybookURI.createDatasetPath(profileName, dataset, E4E_FOLDER),
       copybook.substring(
         0,
         copybook.indexOf(".") !== -1 ? copybook.indexOf(".") : copybook.length,
       ),
     );
+    return e4ePath;
   }
 }

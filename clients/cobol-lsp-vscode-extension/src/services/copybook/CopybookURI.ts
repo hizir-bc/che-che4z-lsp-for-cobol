@@ -82,10 +82,11 @@ export class CopybookURI {
   public static createDatasetPath(
     profileName: string,
     dataset: string,
+    source: string = ZOWE_FOLDER,
   ): string {
     const rootPath = path.join(
       Utils.getC4ZHomeFolder(),
-      ZOWE_FOLDER,
+      source,
       COPYBOOKS_FOLDER,
     );
     return path.join(rootPath, profileName, dataset);

@@ -68,6 +68,7 @@ export const DEFAULT_DIALECT = "COBOL";
 export const CLEARING_COPYBOOK_CACHE = "Clearing downloaded copybook cache";
 export const COPYBOOK_CACHE_CLEARED_INFO = "Downloaded copybooks removed";
 export const ZOWE_FOLDER: string = ".zowe";
+export const E4E_FOLDER: string = ".e4e";
 
 export enum PUNCH_CARD {
   SEQUENCE_AREA_END_POS = 6,

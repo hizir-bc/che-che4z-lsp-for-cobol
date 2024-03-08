@@ -633,7 +633,7 @@ export class CopybookDownloadService implements vscode.Disposable {
 
     elements.forEach(async (_element: any) => {
       const element = await endevorApi.getElement(profile, _element);
-      const _path = this.getPath("endevorProfile", "ELEMENT", "TAHTA");
+      const _path = this.getPath("endevorProfile", "ELEMENT");
       this.writeFile(_path, element);
     });
 

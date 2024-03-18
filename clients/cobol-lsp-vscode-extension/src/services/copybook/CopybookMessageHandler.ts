@@ -16,8 +16,9 @@ import { SettingsService } from "../Settings";
 import { searchCopybookInWorkspace } from "../util/FSUtils";
 import { CopybookURI } from "./CopybookURI";
 import { CopybookName } from "./CopybookDownloadService";
-import { Uri } from "vscode";
 import * as path from "path";
+import { Utils } from "../util/Utils";
+import { COPYBOOKS_FOLDER, E4E_FOLDER } from "../../constants";
 
 enum CopybookFolderKind {
   "local",
@@ -83,13 +84,27 @@ function getTargetFolderForCopybook(
       result = SettingsService.getCopybookLocalPath(documentUri, dialectType);
       break;
     case CopybookFolderKind[CopybookFolderKind["downloaded-dsn"]]:
-      result = SettingsService.getDsnPath(documentUri, dialectType).map(
-        (dnsPath) =>
-          CopybookURI.createDatasetPath(
-            SettingsService.getProfileName(),
-            dnsPath,
+      if (documentUri.startsWith("ndvr")) {
+        const fName = path.parse(documentUri);
+        result = [
+          path.join(
+            Utils.getC4ZHomeFolder(),
+            E4E_FOLDER,
+            COPYBOOKS_FOLDER,
+            "connFinance",
+            fName.dir.replace("ndvr:", ""),
+            fName.name.split(".")[0],
           ),
-      );
+        ];
+      } else {
+        result = SettingsService.getDsnPath(documentUri, dialectType).map(
+          (dnsPath) =>
+            CopybookURI.createDatasetPath(
+              SettingsService.getProfileName(),
+              dnsPath,
+            ),
+        );
+      }
       break;
     case CopybookFolderKind[CopybookFolderKind["downloaded-uss"]]:
       result = SettingsService.getUssPath(documentUri, dialectType).map(

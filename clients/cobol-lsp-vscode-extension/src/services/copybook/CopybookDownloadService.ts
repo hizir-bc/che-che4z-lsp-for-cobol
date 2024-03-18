@@ -50,7 +50,7 @@ export class CopybookName {
 const experimentTag = "experiment-tag";
 export class CopybookDownloadService implements vscode.Disposable {
   public static checkWorkspace(): boolean {
-    if (!path.join(Utils.getC4ZHomeFolder(), ZOWE_FOLDER)) {
+    if (!path.join(Utils.getC4ZHomeFolder())) {
       vscode.window.showErrorMessage("No workspace folder opened.");
       return false;
     }
@@ -612,12 +612,31 @@ export class CopybookDownloadService implements vscode.Disposable {
       preProcessors: ["DSNHPC", "DFHECP1$"],
       type: ProcessorConfigurationType.COBOL,
     });
+    if (conf instanceof Error) throw conf;
 
     const copybookInfo = conf.pgroups[0].libs;
 
+    const candidate = copybookInfo.pgroups.find(
+      (x) => x.name === copybookInfo.pgms[0].pgroup,
+    );
+    if (!candidate) throw Error("Invalid configuration");
+
+    let env;
+    copybookInfo.forEach((element) => {
+      if (element["environment"]) {
+        env = element;
+      }
+    });
+
     copybookInfo.forEach(async (element: any) => {
       if (element[dataset]) {
-        await this.downloadDatasetE4e(element, endevorExplorerApi, endProfile);
+        await this.downloadDatasetE4e(
+          element,
+          endevorExplorerApi,
+          endProfile,
+          env,
+          conf.pgms[0].program,
+        );
       } else if (false && element[environment]) {
         await this.downloadElementE4e(element, endevorExplorerApi, endProfile);
       }
@@ -644,9 +663,15 @@ export class CopybookDownloadService implements vscode.Disposable {
     ds: any,
     endevorApi: IEndevorApiClient,
     profile: any,
+    environment: any,
+    program: any,
   ) {
     const members: any = await endevorApi.listMembers(profile, ds);
-    const _folder: string = this.getFolder("endevorProfile", ds["dataset"]);
+    const _folder: string = this.getFolder(
+      profile.profile,
+      program,
+      environment,
+    );
     members.forEach(async (member: any) => {
       const memberContent = await endevorApi.getMember(profile, {
         dataset: ds["dataset"],
@@ -673,10 +698,16 @@ export class CopybookDownloadService implements vscode.Disposable {
     );
   }
 
-  private static getFolder(profileName, dataset): string {
+  private static getFolder(profileName, ds: any, environment): string {
     const folder = CopybookURI.createDatasetPath(
-      profileName,
-      dataset,
+      profileName.split(".")[1],
+      path.join(
+        environment["environment"],
+        environment["stage"],
+        environment["system"],
+        environment["subsystem"],
+        ds,
+      ),
       E4E_FOLDER,
     );
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });

@@ -38,10 +38,7 @@ import { ProfileUtils } from "../util/ProfileUtils";
 import { Utils } from "../util/Utils";
 import { CopybookURI } from "./CopybookURI";
 import { CopybookProfile, DownloadQueue } from "./DownloadQueue";
-import {
-  IEndevorApiClient,
-  ProcessorConfigurationType,
-} from "../../type/endevorApi.d";
+import { IEndevorApiClient } from "../../type/endevorApi.d";
 
 export class CopybookName {
   public constructor(public name: string, public dialect: string) {}

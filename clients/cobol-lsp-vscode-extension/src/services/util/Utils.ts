@@ -17,8 +17,9 @@ import * as path from "path";
 import * as os from "os";
 import { C4Z_FOLDER } from "../../constants";
 import {
-  ProcessorConfigurationType,
+  IEndevorApiClient,
   e4eResponse,
+  defaultConfigs,
   profileAsString,
   translateLibs,
 } from "../../type/endevorApi.d";
@@ -58,7 +59,7 @@ export class Utils {
     if (!ext) {
       return Promise.resolve(null);
     }
-    const e4e = await ext.activate();
+    const e4e: IEndevorApiClient = await ext.activate();
 
     const uriString = uri.toString();
     if (!e4e.isEndevorElement(uriString)) return null;
@@ -66,7 +67,7 @@ export class Utils {
     const profile = await e4e.getProfileInfo(uriString);
     if (profile instanceof Error) throw profile;
 
-    const result = await e4e.getConfiguration(uriString);
+    const result = await e4e.getConfiguration(uriString, defaultConfigs);
     if (result instanceof Error) throw result;
     const candidate = result.pgroups.find(
       (x) => x.name === result.pgms[0].pgroup,

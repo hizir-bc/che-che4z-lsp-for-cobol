@@ -95,11 +95,19 @@ export type ResolvedProfile = {
   profile: string;
   instance: string;
 };
-
 export type ExternalConfigurationOptions = {
-  compiler?: "IGYCRCTL";
-  preprocessor?: ["DSNHPC", "DFHECP1$"];
-  type: ProcessorConfigurationType.COBOL;
+  compiler: string;
+  preprocessor: string[];
+  type: string;
+};
+externalConfigs = {
+  compiler: "IGYCRCTL",
+  preprocessor: ["DSNHPC", "DFHECP1$"],
+  type: ProcessorConfigurationType.COBOL,
+};
+
+export const defaultConfigs: ExternalConfigurationOptions = {
+  ...externalConfigs,
 };
 
 export interface IEndevorApiClient {

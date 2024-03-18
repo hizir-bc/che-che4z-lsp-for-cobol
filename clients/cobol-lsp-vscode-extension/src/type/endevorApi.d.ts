@@ -387,7 +387,10 @@ export type Library =
     };
 
 interface e4eResponse {
-  configuration: E4EExternalConfigurationResponse;
+  configuration: {
+    name: string;
+    libs: any[];
+  };
   api: IEndevorApiClient;
   profile: ResolvedProfile;
 }

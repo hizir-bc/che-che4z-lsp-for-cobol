@@ -22,6 +22,7 @@ import {
   defaultConfigs,
   profileAsString,
   translateLibs,
+  E4EExternalConfigurationResponse,
 } from "../../type/endevorApi.d";
 
 /**
@@ -49,17 +50,21 @@ export class Utils {
     return ext.exports as any;
   }
 
-  public static async getEndevorExplorerAPI(
-    uri: vscode.Uri,
-  ): Promise<e4eResponse | null> {
+  private static async getEndevorExplorerAPI(): Promise<IEndevorApiClient> {
     const ext = vscode.extensions.getExtension(
       "BroadcomMFD.explorer-for-endevor",
     );
 
     if (!ext) {
-      return Promise.resolve(null);
+      return Promise.resolve(undefined);
     }
-    const e4e: IEndevorApiClient = await ext.activate();
+
+    await ext.activate();
+    return ext.exports as any;
+  }
+
+  public static async getE4EAPI(uri: vscode.Uri): Promise<e4eResponse | null> {
+    const e4e: IEndevorApiClient = await this.getEndevorExplorerAPI();
 
     const uriString = uri.toString();
     if (!e4e.isEndevorElement(uriString)) return null;
@@ -67,28 +72,21 @@ export class Utils {
     const profile = await e4e.getProfileInfo(uriString);
     if (profile instanceof Error) throw profile;
 
-    const result = await e4e.getConfiguration(uriString, defaultConfigs);
+    const result: E4EExternalConfigurationResponse | Error =
+      await e4e.getConfiguration(uriString, defaultConfigs);
     if (result instanceof Error) throw result;
+
     const candidate = result.pgroups.find(
       (x) => x.name === result.pgms[0].pgroup,
     );
     if (!candidate) throw Error("Invalid configuration");
+
     return {
       configuration: {
-        pgroups: [
-          {
-            name: candidate.name,
-            libs: candidate.libs.map((x) =>
-              translateLibs(x, profileAsString(profile)),
-            ),
-          },
-        ],
-        pgms: [
-          {
-            program: candidate.pgms[0],
-            pgroup: candidate.pgroup,
-          },
-        ],
+        name: candidate.name,
+        libs: candidate.libs.map((x) =>
+          translateLibs(x, profileAsString(profile)),
+        ),
       },
       profile: profile,
       api: e4e,

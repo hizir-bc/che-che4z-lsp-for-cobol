@@ -599,7 +599,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E() {
-    const endevorExplorerApi = await Utils.getEndevorExplorerAPI(
+    const endevorExplorerApi = await Utils.getE4EAPI(
       vscode.window?.activeTextEditor?.document.uri,
     );
 
@@ -607,14 +607,14 @@ export class CopybookDownloadService implements vscode.Disposable {
     const environment = "environment";
     const conf = endevorExplorerApi.configuration;
 
-    conf.pgroups[0].libs.forEach(async (element: any) => {
+    conf.libs.forEach(async (element: any) => {
       if (element[dataset]) {
         await this.downloadDatasetE4e(
           element,
           endevorExplorerApi.api,
           endevorExplorerApi.configuration,
           endevorExplorerApi.profile.profile,
-          conf.pgms[0].program,
+          conf.name,
         );
       } else if (element[environment]) {
         await this.downloadElementE4e(

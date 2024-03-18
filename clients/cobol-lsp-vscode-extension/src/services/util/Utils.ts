@@ -66,9 +66,7 @@ export class Utils {
     const profile = await e4e.getProfileInfo(uriString);
     if (profile instanceof Error) throw profile;
 
-    const result = await e4e.getConfiguration(uriString, {
-      type: ProcessorConfigurationType.COBOL,
-    });
+    const result = await e4e.getConfiguration(uriString);
     if (result instanceof Error) throw result;
     const candidate = result.pgroups.find(
       (x) => x.name === result.pgms[0].pgroup,
@@ -91,6 +89,7 @@ export class Utils {
           },
         ],
       },
+      profile: profile,
       api: e4e,
     };
   }

@@ -97,8 +97,8 @@ export type ResolvedProfile = {
 };
 
 export type ExternalConfigurationOptions = {
-  compiler?: string;
-  preProcessors?: string[];
+  compiler?: "IGYCRCTL";
+  preprocessor?: ["DSNHPC", "DFHECP1$"];
   type: ProcessorConfigurationType.COBOL;
 };
 
@@ -354,13 +354,6 @@ export function profileAsString(profile: ResolvedProfile) {
   return `${profile.instance}@${profile.profile}`;
 }
 
-export interface ProcGrpsSchemaJson {
-  name: string;
-  libs: Library[];
-  compiler?: "IGYCRCTL";
-  preprocessor?: ProcessorConfigurationType.COBOL;
-}
-
 export type Library =
   | string
   | {
@@ -388,4 +381,5 @@ export type Library =
 interface e4eResponse {
   configuration: E4EExternalConfigurationResponse;
   api: IEndevorApiClient;
+  profile: ResolvedProfile;
 }

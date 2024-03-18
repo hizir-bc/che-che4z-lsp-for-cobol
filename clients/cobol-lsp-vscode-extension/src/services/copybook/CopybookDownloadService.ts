@@ -610,16 +610,20 @@ export class CopybookDownloadService implements vscode.Disposable {
     const environment = "environment";
     const conf = endevorExplorerApi.configuration;
 
-    let env;
-
     conf.pgroups[0].libs.forEach(async (element: any) => {
       if (element[dataset]) {
         await this.downloadDatasetE4e(
           element,
           endevorExplorerApi.api,
-          endevorExplorerApi.configuration.pgms,
-          env,
+          endevorExplorerApi.configuration,
+          endevorExplorerApi.profile.profile,
           conf.pgms[0].program,
+        );
+      } else if (element[environment]) {
+        await this.downloadElementE4e(
+          element,
+          endevorExplorerApi.api,
+          endevorExplorerApi.profile,
         );
       }
     });

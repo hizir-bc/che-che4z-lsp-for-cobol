@@ -602,43 +602,25 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E() {
-    const endevorExplorerApi = await Utils.getEndevorExplorerAPI();
-    const uriString = vscode.window?.activeTextEditor?.document.uri.toString()!; //duzelt
-    const endProfile = await endevorExplorerApi.getProfileInfo(uriString);
+    const endevorExplorerApi = await Utils.getEndevorExplorerAPI(
+      vscode.window?.activeTextEditor?.document.uri,
+    );
+
     const dataset = "dataset";
     const environment = "environment";
-    const conf = await endevorExplorerApi.getConfiguration(uriString, {
-      compiler: "IGYCRCTL",
-      preProcessors: ["DSNHPC", "DFHECP1$"],
-      type: ProcessorConfigurationType.COBOL,
-    });
-    if (conf instanceof Error) throw conf;
-
-    const copybookInfo = conf.pgroups[0].libs;
-
-    const candidate = copybookInfo.pgroups.find(
-      (x) => x.name === copybookInfo.pgms[0].pgroup,
-    );
-    if (!candidate) throw Error("Invalid configuration");
+    const conf = endevorExplorerApi.configuration;
 
     let env;
-    copybookInfo.forEach((element) => {
-      if (element["environment"]) {
-        env = element;
-      }
-    });
 
-    copybookInfo.forEach(async (element: any) => {
+    conf.pgroups[0].libs.forEach(async (element: any) => {
       if (element[dataset]) {
         await this.downloadDatasetE4e(
           element,
-          endevorExplorerApi,
-          endProfile,
+          endevorExplorerApi.api,
+          endevorExplorerApi.configuration.pgms,
           env,
           conf.pgms[0].program,
         );
-      } else if (false && element[environment]) {
-        await this.downloadElementE4e(element, endevorExplorerApi, endProfile);
       }
     });
   }

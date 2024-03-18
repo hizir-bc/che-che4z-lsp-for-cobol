@@ -16,7 +16,12 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
 import { C4Z_FOLDER } from "../../constants";
-import { IEndevorApiClient } from "../../type/endevorApi";
+import {
+  ProcessorConfigurationType,
+  e4eResponse,
+  profileAsString,
+  translateLibs,
+} from "../../type/endevorApi.d";
 
 /**
  * This class collects utility methods for general purpose activities
@@ -43,18 +48,51 @@ export class Utils {
     return ext.exports as any;
   }
 
-  public static async getEndevorExplorerAPI(): Promise<IEndevorApiClient> {
+  public static async getEndevorExplorerAPI(
+    uri: vscode.Uri,
+  ): Promise<e4eResponse | null> {
     const ext = vscode.extensions.getExtension(
       "BroadcomMFD.explorer-for-endevor",
     );
 
     if (!ext) {
-      return Promise.resolve(
-        undefined,
-      ) as unknown as Promise<IEndevorApiClient>;
+      return Promise.resolve(null);
     }
-    await ext.activate();
-    return ext.exports as any;
+    const e4e = await ext.activate();
+
+    const uriString = uri.toString();
+    if (!e4e.isEndevorElement(uriString)) return null;
+
+    const profile = await e4e.getProfileInfo(uriString);
+    if (profile instanceof Error) throw profile;
+
+    const result = await e4e.getConfiguration(uriString, {
+      type: ProcessorConfigurationType.COBOL,
+    });
+    if (result instanceof Error) throw result;
+    const candidate = result.pgroups.find(
+      (x) => x.name === result.pgms[0].pgroup,
+    );
+    if (!candidate) throw Error("Invalid configuration");
+    return {
+      configuration: {
+        pgroups: [
+          {
+            name: candidate.name,
+            libs: candidate.libs.map((x) =>
+              translateLibs(x, profileAsString(profile)),
+            ),
+          },
+        ],
+        pgms: [
+          {
+            program: candidate.pgms[0],
+            pgroup: candidate.pgroup,
+          },
+        ],
+      },
+      api: e4e,
+    };
   }
 
   public static getC4ZHomeFolder() {

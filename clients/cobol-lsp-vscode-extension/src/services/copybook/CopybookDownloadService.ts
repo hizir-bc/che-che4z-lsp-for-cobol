@@ -38,7 +38,7 @@ import { ProfileUtils } from "../util/ProfileUtils";
 import { Utils } from "../util/Utils";
 import { CopybookURI } from "./CopybookURI";
 import { CopybookProfile, DownloadQueue } from "./DownloadQueue";
-import { IEndevorApiClient } from "../../type/endevorApi.d";
+import { IEndevorApiClient, e4eResponse } from "../../type/endevorApi.d";
 
 export class CopybookName {
   public constructor(public name: string, public dialect: string) {}
@@ -599,31 +599,49 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E() {
-    const endevorExplorerApi = await Utils.getE4EAPI(
+    const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
       vscode.window?.activeTextEditor?.document.uri,
     );
 
     const dataset = "dataset";
     const environment = "environment";
-    const conf = endevorExplorerApi.configuration;
+    const configurations = endevorExplorerApi.configuration;
 
-    conf.libs.forEach(async (element: any) => {
-      if (element[dataset]) {
-        await this.downloadDatasetE4e(
-          element,
-          endevorExplorerApi.api,
-          endevorExplorerApi.configuration,
-          endevorExplorerApi.profile.profile,
-          conf.name,
+    configurations.libs.forEach(async (configuration: any) => {
+      if (configuration[dataset]) {
+        const containsCopybook = await this.listMembers(
+          endevorExplorerApi,
+          configuration,
         );
-      } else if (element[environment]) {
-        await this.downloadElementE4e(
-          element,
-          endevorExplorerApi.api,
-          endevorExplorerApi.profile,
+      } else if (configuration[environment]) {
+        const containsCopybook = await this.listElements(
+          endevorExplorerApi,
+          configuration,
         );
       }
     });
+  }
+
+  private static async listElements(
+    endevorExplorerApi: e4eResponse,
+    element,
+  ): Promise<boolean> {
+    const members = await endevorExplorerApi.api.listElements(
+      endevorExplorerApi.profile,
+      element,
+    );
+    return members?.toString().includes("AMXHDR17");
+  }
+
+  private static async listMembers(
+    endevorExplorerApi: e4eResponse,
+    element,
+  ): Promise<boolean> {
+    const members = await endevorExplorerApi.api.listMembers(
+      endevorExplorerApi.profile,
+      element,
+    );
+    return members?.toString().includes("AMXHDR17");
   }
 
   private static async downloadElementE4e(

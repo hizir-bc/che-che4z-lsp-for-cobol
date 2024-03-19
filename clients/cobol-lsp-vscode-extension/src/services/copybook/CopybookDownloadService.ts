@@ -670,11 +670,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     endevorApi: e4eResponse,
     copybookProfile: any,
   ) {
-    const _folder: string = this.getFolder(
-      endevorApi.profile.profile,
-      copybookProfile.documentUri,
-      ds,
-    );
+    const _folder: string = this.getFolder(endevorApi.profile.profile);
 
     const memberContent = await endevorApi.api.getMember(endevorApi.profile, {
       dataset: ds["dataset"],
@@ -699,16 +695,11 @@ export class CopybookDownloadService implements vscode.Disposable {
     );
   }
 
-  private static getFolder(profileName, ds: any, environment): string {
+  private static getFolder(profileName): string {
+    const uri = vscode.window?.activeTextEditor?.document.uri;
     const folder = CopybookURI.createDatasetPath(
       profileName.split(".")[1],
-      path.join(
-        environment["environment"],
-        environment["stage"],
-        environment["system"],
-        environment["subsystem"],
-        ds,
-      ),
+      uri.path.split(".")[0],
       E4E_FOLDER,
     );
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });

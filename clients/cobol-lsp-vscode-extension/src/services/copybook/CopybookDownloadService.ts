@@ -634,7 +634,7 @@ export class CopybookDownloadService implements vscode.Disposable {
       element,
     );
     if (elements?.toString().includes(copybookProfile.getCopybook())) {
-      this.downloadElementE4e(element, endevorExplorerApi, copybookProfile);
+      this.downloadElementE4e(endevorExplorerApi, copybookProfile);
     }
   }
 

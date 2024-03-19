@@ -626,15 +626,15 @@ export class CopybookDownloadService implements vscode.Disposable {
 
   private static async handleElements(
     endevorExplorerApi: e4eResponse,
-    element,
+    elementInfo,
     copybookProfile,
   ): Promise<void> {
     const elements = await endevorExplorerApi.api.listElements(
       endevorExplorerApi.profile,
-      element,
+      elementInfo,
     );
     if (elements?.toString().includes(copybookProfile.getCopybook())) {
-      this.downloadElementE4e(endevorExplorerApi, copybookProfile);
+      this.downloadElementE4e(endevorExplorerApi, copybookProfile, elementInfo);
     }
   }
 
@@ -655,16 +655,18 @@ export class CopybookDownloadService implements vscode.Disposable {
   private static async downloadElementE4e(
     endevorApi: e4eResponse,
     copybookProfile: any,
+    elementInfo: any,
   ) {
     const _folder: string = this.getFolder(endevorApi.profile.profile);
 
+    elementInfo.element = copybookProfile.getCopybook();
     const element = await endevorApi.api.getElement(
       endevorApi.profile,
-      copybookProfile.getCopybook(),
+      elementInfo,
     );
 
     const _path = this.getPath(_folder, copybookProfile.getCopybook());
-    this.writeFile(_path, element);
+    this.writeFile(_path, element[0]);
   }
 
   private static async downloadDatasetE4e(

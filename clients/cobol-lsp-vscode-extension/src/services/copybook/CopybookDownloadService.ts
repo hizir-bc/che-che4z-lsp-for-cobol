@@ -134,7 +134,7 @@ export class CopybookDownloadService implements vscode.Disposable {
         isUSS,
       );
     } else {
-      this.downloadCopybooke4E();
+      this.downloadCopybooke4E(copybookProfile);
     }
 
     return true;
@@ -598,7 +598,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     }
   }
 
-  private static async downloadCopybooke4E() {
+  private static async downloadCopybooke4E(copybookProfile: CopybookProfile) {
     const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
       vscode.window?.activeTextEditor?.document.uri,
     );
@@ -609,80 +609,80 @@ export class CopybookDownloadService implements vscode.Disposable {
 
     configurations.libs.forEach(async (configuration: any) => {
       if (configuration[dataset]) {
-        const containsCopybook = await this.listMembers(
+        await this.handleMembers(
           endevorExplorerApi,
           configuration,
+          copybookProfile,
         );
       } else if (configuration[environment]) {
-        const containsCopybook = await this.listElements(
+        await this.handleElements(
           endevorExplorerApi,
           configuration,
+          copybookProfile,
         );
       }
     });
   }
 
-  private static async listElements(
+  private static async handleElements(
     endevorExplorerApi: e4eResponse,
     element,
-  ): Promise<boolean> {
-    const members = await endevorExplorerApi.api.listElements(
+    copybookProfile,
+  ): Promise<void> {
+    const elements = await endevorExplorerApi.api.listElements(
       endevorExplorerApi.profile,
       element,
     );
-    return members?.toString().includes("AMXHDR17");
+    if (false && elements?.toString().includes(copybookProfile.getCopybook())) {
+      this.downloadElementE4e(element, endevorExplorerApi, copybookProfile);
+    }
   }
 
-  private static async listMembers(
+  private static async handleMembers(
     endevorExplorerApi: e4eResponse,
     element,
-  ): Promise<boolean> {
+    copybookProfile,
+  ): Promise<void> {
     const members = await endevorExplorerApi.api.listMembers(
       endevorExplorerApi.profile,
       element,
     );
-    return members?.toString().includes("AMXHDR17");
+    if (members?.toString().includes(copybookProfile.getCopybook())) {
+      this.downloadDatasetE4e(element, endevorExplorerApi, copybookProfile);
+    }
   }
 
   private static async downloadElementE4e(
     elementInfo: any,
-    endevorApi: IEndevorApiClient,
-    profile: any,
+    endevorApi: e4eResponse,
+    copybook: any,
   ) {
-    const elements: any = await endevorApi.listElements(profile, elementInfo);
-
-    elements.forEach(async (_element: any) => {
-      const element = await endevorApi.getElement(profile, _element);
-      const _path = this.getPath("endevorProfile", "ELEMENT");
-      this.writeFile(_path, element);
-    });
-
-    return elements;
+    const element = await endevorApi.api.getElement(
+      endevorApi.profile,
+      copybook,
+    );
+    const _path = this.getPath("endevorProfile", "ELEMENT");
+    this.writeFile(_path, element);
   }
 
   private static async downloadDatasetE4e(
     ds: any,
-    endevorApi: IEndevorApiClient,
-    profile: any,
-    environment: any,
-    program: any,
+    endevorApi: e4eResponse,
+    copybookProfile: any,
   ) {
-    const members: any = await endevorApi.listMembers(profile, ds);
     const _folder: string = this.getFolder(
-      profile.profile,
-      program,
-      environment,
+      endevorApi.profile.profile,
+      copybookProfile.documentUri,
+      ds,
     );
-    members.forEach(async (member: any) => {
-      const memberContent = await endevorApi.getMember(profile, {
-        dataset: ds["dataset"],
-        member: member,
-      });
 
-      const _path = this.getPath(_folder, member);
-      this.writeFile(_path, memberContent);
+    const memberContent = await endevorApi.api.getMember(endevorApi.profile, {
+      dataset: ds["dataset"],
+      member: copybookProfile.getCopybook(),
     });
-    return members;
+
+    const _path = this.getPath(_folder, copybookProfile.getCopybook());
+    this.writeFile(_path, memberContent);
   }
 
   private static writeFile(filePath, newContent) {

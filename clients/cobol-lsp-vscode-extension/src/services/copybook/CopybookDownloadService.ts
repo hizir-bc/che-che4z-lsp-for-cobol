@@ -30,7 +30,6 @@ import {
   SETTINGS_CPY_SECTION,
   UNLOCK_DOWNLOAD_QUEUE_MSG,
   ZOWE_EXT_MISSING_MSG,
-  ZOWE_FOLDER,
 } from "../../constants";
 import { TelemetryService } from "../reporter/TelemetryService";
 import { createFileWithGivenPath, SettingsService } from "../Settings";
@@ -38,7 +37,7 @@ import { ProfileUtils } from "../util/ProfileUtils";
 import { Utils } from "../util/Utils";
 import { CopybookURI } from "./CopybookURI";
 import { CopybookProfile, DownloadQueue } from "./DownloadQueue";
-import { IEndevorApiClient, e4eResponse } from "../../type/endevorApi.d";
+import { e4eResponse } from "../../type/endevorApi.d";
 
 export class CopybookName {
   public constructor(public name: string, public dialect: string) {}
@@ -46,14 +45,6 @@ export class CopybookName {
 
 const experimentTag = "experiment-tag";
 export class CopybookDownloadService implements vscode.Disposable {
-  public static checkWorkspace(): boolean {
-    if (!path.join(Utils.getC4ZHomeFolder())) {
-      vscode.window.showErrorMessage("No workspace folder opened.");
-      return false;
-    }
-    return true;
-  }
-
   private static completedDownload: number = 0;
   private static totalDownload: number = 0;
 
@@ -100,11 +91,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   ): Promise<boolean> {
     let members: string[] = [];
 
-    if (
-      !vscode.window?.activeTextEditor?.document.uri
-        .toString()
-        .startsWith("ndvr")
-    ) {
+    if (!Utils.isActiveFileEndevor()) {
       try {
         members = await CopybookDownloadService.getAllMembers(
           dataset,
@@ -398,60 +385,59 @@ export class CopybookDownloadService implements vscode.Disposable {
           .filter((n) => n !== undefined),
       ),
     ];
-
-    if (!CopybookDownloadService.isEligibleForCopybookDownload(dialects)) {
-      if (!quiet) {
-        CopybookDownloadService.createErrorMessageForCopybooks(
-          new Set<string>(copybookNames.map((c) => c.name)),
-        );
-      }
-      return;
-    }
-    const explorerAPI = await Utils.getZoweExplorerAPI();
-    if (
-      CopybookDownloadService.isEligibleForCopybookDownload(dialects) &&
-      !explorerAPI
-    ) {
-      if (!quiet) {
-        vscode.window
-          .showErrorMessage(ZOWE_EXT_MISSING_MSG, INSTALL_ZOWE)
-          .then((action) => {
-            if (action === INSTALL_ZOWE) {
-              vscode.commands.executeCommand(
-                "workbench.extensions.search",
-                "zowe.vscode-extension-for-zowe",
-              );
-            }
-          });
-      }
-      return;
-    }
-
-    if (!CopybookDownloadService.checkWorkspace()) {
-      return;
-    }
-    const profile = await ProfileUtils.getProfileNameForCopybook(documentUri);
-    const availableProfiles = ProfileUtils.getAvailableProfiles(explorerAPI);
-
-    if (!profile || availableProfiles.indexOf(profile) < 0) {
-      if (!quiet) {
-        const providedProfile: string = SettingsService.getProfileName();
-        const message = providedProfile
-          ? `${PROVIDE_PROFILE_MSG} Provided invalid profile name: ${providedProfile}`
-          : `${PROVIDE_PROFILE_MSG}`;
-        CopybookDownloadService.processDownloadError(message);
-      }
-      return;
-    }
-
-    if (this.lockedProfile.has(profile)) {
-      if (quiet) {
+    let profile;
+    if (!Utils.isActiveFileEndevor()) {
+      if (!CopybookDownloadService.isEligibleForCopybookDownload(dialects)) {
+        if (!quiet) {
+          CopybookDownloadService.createErrorMessageForCopybooks(
+            new Set<string>(copybookNames.map((c) => c.name)),
+          );
+        }
         return;
       }
-      if (await CopybookDownloadService.showQueueLockedDialog(profile)) {
-        this.lockedProfile.delete(profile);
-      } else {
+      const explorerAPI = await Utils.getZoweExplorerAPI();
+      if (
+        CopybookDownloadService.isEligibleForCopybookDownload(dialects) &&
+        !explorerAPI
+      ) {
+        if (!quiet) {
+          vscode.window
+            .showErrorMessage(ZOWE_EXT_MISSING_MSG, INSTALL_ZOWE)
+            .then((action) => {
+              if (action === INSTALL_ZOWE) {
+                vscode.commands.executeCommand(
+                  "workbench.extensions.search",
+                  "zowe.vscode-extension-for-zowe",
+                );
+              }
+            });
+        }
         return;
+      }
+
+      profile = await ProfileUtils.getProfileNameForCopybook(documentUri);
+      const availableProfiles = ProfileUtils.getAvailableProfiles(explorerAPI);
+
+      if (!profile || availableProfiles.indexOf(profile) < 0) {
+        if (!quiet) {
+          const providedProfile: string = SettingsService.getProfileName();
+          const message = providedProfile
+            ? `${PROVIDE_PROFILE_MSG} Provided invalid profile name: ${providedProfile}`
+            : `${PROVIDE_PROFILE_MSG}`;
+          CopybookDownloadService.processDownloadError(message);
+        }
+        return;
+      }
+
+      if (this.lockedProfile.has(profile)) {
+        if (quiet) {
+          return;
+        }
+        if (await CopybookDownloadService.showQueueLockedDialog(profile)) {
+          this.lockedProfile.delete(profile);
+        } else {
+          return;
+        }
       }
     }
 

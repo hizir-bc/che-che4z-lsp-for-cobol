@@ -15,7 +15,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
-import { C4Z_FOLDER } from "../../constants";
+import { C4Z_FOLDER, E4E_SCHEME } from "../../constants";
 import {
   IEndevorApiClient,
   e4eResponse,
@@ -95,5 +95,8 @@ export class Utils {
 
   public static getC4ZHomeFolder() {
     return path.join(os.homedir(), C4Z_FOLDER);
+  }
+  public static isActiveFileEndevor() {
+    return vscode.window?.activeTextEditor?.document.uri.scheme === E4E_SCHEME;
   }
 }

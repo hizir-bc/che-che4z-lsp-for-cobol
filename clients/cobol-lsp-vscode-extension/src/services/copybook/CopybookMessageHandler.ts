@@ -24,6 +24,7 @@ enum CopybookFolderKind {
   "local",
   "downloaded-dsn",
   "downloaded-uss",
+  "downloaded-endevor",
 }
 
 export async function resolveCopybookHandler(
@@ -84,35 +85,13 @@ function getTargetFolderForCopybook(
       result = SettingsService.getCopybookLocalPath(documentUri, dialectType);
       break;
     case CopybookFolderKind[CopybookFolderKind["downloaded-dsn"]]:
-      if (documentUri.startsWith("ndvr")) {
-        const fName = path.parse(documentUri);
-
-        result = [
-          path.join(
-            Utils.getC4ZHomeFolder(),
-            E4E_FOLDER,
-            COPYBOOKS_FOLDER,
-            documentUri
-              .split("/")
-              .slice(1)
-              .map(decodeURIComponent)[5]
-              .split("name")[1]
-              .split(",")[0]
-              .split(":")[1]
-              .replace(/"/g, ""),
-            fName.dir.replace("ndvr:", ""),
-            fName.name.split(".")[0],
+      result = SettingsService.getDsnPath(documentUri, dialectType).map(
+        (dnsPath) =>
+          CopybookURI.createDatasetPath(
+            SettingsService.getProfileName(),
+            dnsPath,
           ),
-        ];
-      } else {
-        result = SettingsService.getDsnPath(documentUri, dialectType).map(
-          (dnsPath) =>
-            CopybookURI.createDatasetPath(
-              SettingsService.getProfileName(),
-              dnsPath,
-            ),
-        );
-      }
+      );
       break;
     case CopybookFolderKind[CopybookFolderKind["downloaded-uss"]]:
       result = SettingsService.getUssPath(documentUri, dialectType).map(
@@ -122,6 +101,26 @@ function getTargetFolderForCopybook(
             dnsPath,
           ),
       );
+      break;
+    case CopybookFolderKind[CopybookFolderKind["downloaded-endevor"]]:
+      const fName = path.parse(documentUri);
+      result = [
+        path.join(
+          Utils.getC4ZHomeFolder(),
+          E4E_FOLDER,
+          COPYBOOKS_FOLDER,
+          documentUri
+            .split("/")
+            .slice(1)
+            .map(decodeURIComponent)[5]
+            .split("name")[1]
+            .split(",")[0]
+            .split(":")[1]
+            .replace(/"/g, ""),
+          fName.dir.replace("ndvr:", ""),
+          fName.name.split(".")[0],
+        ),
+      ];
       break;
   }
   return result || [];

@@ -21,6 +21,7 @@ import {
   DOWNLOAD_QUEUE_LOCKED_ERROR_MSG,
   E4E_FOLDER,
   ENVIRONMENT,
+  E4E_SCHEME,
   GITIGNORE_FILE,
   INSTALL_ZOWE,
   INVALID_CREDENTIALS_ERROR_MSG,
@@ -259,7 +260,9 @@ export class CopybookDownloadService implements vscode.Disposable {
     const promises = [];
     try {
       for (const cp of toDownload) {
-        const datasets = isUSS
+        const datasets = Utils.isActiveFileEndevor()
+          ? [E4E_SCHEME]
+          : isUSS
           ? SettingsService.getUssPath(cp.documentUri, cp.dialectType)
           : SettingsService.getDsnPath(cp.documentUri, cp.dialectType);
         for (const dataset of datasets) {

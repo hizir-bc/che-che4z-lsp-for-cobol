@@ -17,8 +17,10 @@ import * as iconv from "iconv-lite";
 import * as path from "path";
 import * as vscode from "vscode";
 import {
+  DATASET,
   DOWNLOAD_QUEUE_LOCKED_ERROR_MSG,
   E4E_FOLDER,
+  ENVIRONMENT,
   GITIGNORE_FILE,
   INSTALL_ZOWE,
   INVALID_CREDENTIALS_ERROR_MSG,
@@ -588,19 +590,16 @@ export class CopybookDownloadService implements vscode.Disposable {
     const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
       vscode.window?.activeTextEditor?.document.uri,
     );
-
-    const dataset = "dataset";
-    const environment = "environment";
     const configurations = endevorExplorerApi.configuration;
 
     configurations.libs.forEach(async (configuration: any) => {
-      if (configuration[dataset]) {
+      if (configuration[DATASET]) {
         await this.handleMembers(
           endevorExplorerApi,
           configuration,
           copybookProfile,
         );
-      } else if (configuration[environment]) {
+      } else if (configuration[ENVIRONMENT]) {
         await this.handleElements(
           endevorExplorerApi,
           configuration,

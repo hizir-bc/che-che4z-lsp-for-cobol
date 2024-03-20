@@ -70,6 +70,8 @@ export const COPYBOOK_CACHE_CLEARED_INFO = "Downloaded copybooks removed";
 export const ZOWE_FOLDER: string = ".zowe";
 export const E4E_FOLDER: string = ".e4e";
 export const E4E_SCHEME: string = "ndvr";
+export const DATASET = "dataset";
+export const ENVIRONMENT = "environment";
 
 export enum PUNCH_CARD {
   SEQUENCE_AREA_END_POS = 6,

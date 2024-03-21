@@ -94,7 +94,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   ): Promise<boolean> {
     let members: string[] = [];
 
-    if (!Utils.isActiveFileEndevor()) {
+    if (dataset !== E4E_SCHEME) {
       try {
         members = await CopybookDownloadService.getAllMembers(
           dataset,
@@ -590,26 +590,32 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E(copybookProfile: CopybookProfile) {
-    const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
-      vscode.window?.activeTextEditor?.document.uri,
-    );
-    const configurations = endevorExplorerApi.configuration;
+    const activeEditor = vscode.window?.activeTextEditor?.document.uri;
+    if (
+      activeEditor.scheme === E4E_SCHEME &&
+      activeEditor.path.includes(copybookProfile.documentUri)
+    ) {
+      const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
+        activeEditor,
+      );
+      const configurations = endevorExplorerApi.configuration;
 
-    configurations.libs.forEach(async (configuration: any) => {
-      if (configuration[DATASET]) {
-        await this.handleMembers(
-          endevorExplorerApi,
-          configuration,
-          copybookProfile,
-        );
-      } else if (configuration[ENVIRONMENT]) {
-        await this.handleElements(
-          endevorExplorerApi,
-          configuration,
-          copybookProfile,
-        );
-      }
-    });
+      configurations.libs.forEach(async (configuration: any) => {
+        if (configuration[DATASET]) {
+          await this.handleMembers(
+            endevorExplorerApi,
+            configuration,
+            copybookProfile,
+          );
+        } else if (configuration[ENVIRONMENT]) {
+          await this.handleElements(
+            endevorExplorerApi,
+            configuration,
+            copybookProfile,
+          );
+        }
+      });
+    }
   }
 
   private static async handleElements(

@@ -51,7 +51,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   private static completedDownload: number = 0;
   private static totalDownload: number = 0;
   private static outputChannel: vscode.OutputChannel;
-  private static endevorExplorerApi: any;
+  private static endevorExplorerApi: e4eResponse | null;
 
   public setOutputChannel(outputChannel: vscode.OutputChannel) {
     CopybookDownloadService.outputChannel = outputChannel;

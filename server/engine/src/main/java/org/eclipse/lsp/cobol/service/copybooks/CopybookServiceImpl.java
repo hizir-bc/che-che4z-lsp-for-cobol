@@ -292,7 +292,7 @@ public class CopybookServiceImpl implements CopybookService {
       LOG.debug("Copybooks to download: {}", copybooksToDownload);
       if (!copybooksToDownload.isEmpty()) {
         clientProvider.get().downloadCopybooks(
-            document,
+            documentUri,
             copybooksToDownload.stream().map(CopybookName::getQualifiedName).collect(toList()),
             Optional.ofNullable(copybooksToDownload.stream().findFirst().get().getDialectType()).orElse(COBOL), //NOSONAR
             !processingMode.userInteraction);

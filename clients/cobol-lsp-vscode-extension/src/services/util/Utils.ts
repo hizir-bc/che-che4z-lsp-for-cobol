@@ -84,7 +84,7 @@ export class Utils {
     );
     if (!candidate) throw Error("Invalid configuration");
 
-    this.writeLocationLogs(candidate, outputChannel);
+    this.writeLocationLogs(candidate?.libs, outputChannel);
 
     return {
       configuration: {
@@ -106,6 +106,8 @@ export class Utils {
   }
 
   private static writeLocationLogs(entries, outputChannel) {
-    let asd = 5;
+    entries.forEach((libEntry) => {
+      outputChannel.appendLine(JSON.stringify(libEntry));
+    });
   }
 }

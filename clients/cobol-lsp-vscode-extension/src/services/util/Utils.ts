@@ -15,7 +15,11 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
-import { C4Z_FOLDER, E4E_SCHEME } from "../../constants";
+import {
+  C4Z_FOLDER,
+  E4E_SCHEME,
+  LOOKING_FOR_COPYBOOK_LOCATION,
+} from "../../constants";
 import {
   IEndevorApiClient,
   e4eResponse,
@@ -107,7 +111,9 @@ export class Utils {
 
   private static writeLocationLogs(entries, outputChannel) {
     entries.forEach((libEntry) => {
-      outputChannel.appendLine(JSON.stringify(libEntry));
+      outputChannel.appendLine(
+        LOOKING_FOR_COPYBOOK_LOCATION + JSON.stringify(libEntry),
+      );
     });
   }
 }

@@ -72,6 +72,7 @@ export const E4E_FOLDER: string = ".e4e";
 export const E4E_SCHEME: string = "ndvr";
 export const DATASET = "dataset";
 export const ENVIRONMENT = "environment";
+export const LOOKING_FOR_COPYBOOK_LOCATION = "Looking for location => ";
 
 export enum PUNCH_CARD {
   SEQUENCE_AREA_END_POS = 6,

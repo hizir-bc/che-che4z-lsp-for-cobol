@@ -492,7 +492,8 @@ export class CopybookDownloadService implements vscode.Disposable {
     startTime: number,
   ) {
     {
-      await CopybookDownloadService.initE4eAPI(element.documentUri);
+      if (element?.documentUri.startsWith(E4E_SCHEME))
+        await CopybookDownloadService.initE4eAPI(element.documentUri);
       await this.handleQueue(element, errors, progress);
 
       if (!element.quiet && this.queue.length === 0 && errors.size > 0) {

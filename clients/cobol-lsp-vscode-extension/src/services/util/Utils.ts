@@ -63,7 +63,10 @@ export class Utils {
     return ext.exports as any;
   }
 
-  public static async getE4EAPI(uri: vscode.Uri): Promise<e4eResponse | null> {
+  public static async getE4EAPI(
+    uri: vscode.Uri,
+    outputChannel: vscode.OutputChannel,
+  ): Promise<e4eResponse | null> {
     const e4e: IEndevorApiClient = await this.getEndevorExplorerAPI();
 
     const uriString = uri.toString();
@@ -80,6 +83,8 @@ export class Utils {
       (x) => x.name === result.pgms[0].pgroup,
     );
     if (!candidate) throw Error("Invalid configuration");
+
+    this.writeLocationLogs(candidate, outputChannel);
 
     return {
       configuration: {
@@ -98,5 +103,9 @@ export class Utils {
   }
   public static isEndevorFile(uri: String) {
     return uri.startsWith(E4E_SCHEME);
+  }
+
+  private static writeLocationLogs(entries, outputChannel) {
+    let asd = 5;
   }
 }

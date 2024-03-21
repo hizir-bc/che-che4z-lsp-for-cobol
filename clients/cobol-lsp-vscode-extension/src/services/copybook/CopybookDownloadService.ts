@@ -50,6 +50,11 @@ const experimentTag = "experiment-tag";
 export class CopybookDownloadService implements vscode.Disposable {
   private static completedDownload: number = 0;
   private static totalDownload: number = 0;
+  private static outputChannel: vscode.OutputChannel;
+
+  public setOutputChannel(outputChannel: vscode.OutputChannel) {
+    CopybookDownloadService.outputChannel = outputChannel;
+  }
 
   private static createErrorMessageForCopybooks(datasets: Set<string>) {
     CopybookDownloadService.processDownloadError(
@@ -590,6 +595,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   private static async downloadCopybooke4E(copybookProfile: CopybookProfile) {
     const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
       vscode.Uri.parse(copybookProfile.documentUri),
+      CopybookDownloadService.outputChannel,
     );
     const configurations = endevorExplorerApi.configuration;
 

@@ -54,6 +54,7 @@ function initialize() {
   const copyBooksDownloader = new CopybookDownloadService();
   outputChannel = vscode.window.createOutputChannel("COBOL Language Support");
   languageClientService = new LanguageClientService(outputChannel);
+  copyBooksDownloader.setOutputChannel(getChannel());
   const configurationWatcher = new ConfigurationWatcher();
   return { copyBooksDownloader, configurationWatcher };
 }

@@ -94,7 +94,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   ): Promise<boolean> {
     let members: string[] = [];
 
-    if (dataset !== E4E_SCHEME) {
+    if (!Utils.isEndevorFile(dataset)) {
       try {
         members = await CopybookDownloadService.getAllMembers(
           dataset,
@@ -260,9 +260,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     const promises = [];
     try {
       for (const cp of toDownload) {
-        const datasets = Utils.isActiveFileEndevor()
-          ? [E4E_SCHEME]
-          : isUSS
+        const datasets = isUSS
           ? SettingsService.getUssPath(cp.documentUri, cp.dialectType)
           : SettingsService.getDsnPath(cp.documentUri, cp.dialectType);
         for (const dataset of datasets) {
@@ -391,7 +389,7 @@ export class CopybookDownloadService implements vscode.Disposable {
       ),
     ];
     let profile;
-    if (!Utils.isActiveFileEndevor()) {
+    if (!Utils.isEndevorFile(documentUri)) {
       if (!CopybookDownloadService.isEligibleForCopybookDownload(dialects)) {
         if (!quiet) {
           CopybookDownloadService.createErrorMessageForCopybooks(
@@ -590,32 +588,26 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E(copybookProfile: CopybookProfile) {
-    const activeEditor = vscode.window?.activeTextEditor?.document.uri;
-    if (
-      activeEditor.scheme === E4E_SCHEME &&
-      activeEditor.path.includes(copybookProfile.documentUri)
-    ) {
-      const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
-        activeEditor,
-      );
-      const configurations = endevorExplorerApi.configuration;
+    const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
+      vscode.Uri.parse(copybookProfile.documentUri),
+    );
+    const configurations = endevorExplorerApi.configuration;
 
-      configurations.libs.forEach(async (configuration: any) => {
-        if (configuration[DATASET]) {
-          await this.handleMembers(
-            endevorExplorerApi,
-            configuration,
-            copybookProfile,
-          );
-        } else if (configuration[ENVIRONMENT]) {
-          await this.handleElements(
-            endevorExplorerApi,
-            configuration,
-            copybookProfile,
-          );
-        }
-      });
-    }
+    configurations.libs.forEach(async (configuration: any) => {
+      if (configuration[DATASET]) {
+        await this.handleMembers(
+          endevorExplorerApi,
+          configuration,
+          copybookProfile,
+        );
+      } else if (configuration[ENVIRONMENT]) {
+        await this.handleElements(
+          endevorExplorerApi,
+          configuration,
+          copybookProfile,
+        );
+      }
+    });
   }
 
   private static async handleElements(

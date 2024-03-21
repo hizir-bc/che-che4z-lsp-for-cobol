@@ -96,7 +96,7 @@ export class Utils {
   public static getC4ZHomeFolder() {
     return path.join(os.homedir(), C4Z_FOLDER);
   }
-  public static isActiveFileEndevor() {
-    return vscode.window?.activeTextEditor?.document.uri.scheme === E4E_SCHEME;
+  public static isEndevorFile(uri: String) {
+    return uri.startsWith(E4E_SCHEME);
   }
 }

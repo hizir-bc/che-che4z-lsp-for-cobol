@@ -242,11 +242,15 @@ export class SettingsService {
    * @returns a list of uss path
    */
   public static getUssPath(documentUri: string, dialectType: string): string[] {
-    return SettingsService.getCopybookConfigValues(
-      PATHS_USS,
-      documentUri,
-      dialectType,
-    );
+    if (Utils.isEndevorFile(documentUri)) {
+      return [documentUri];
+    } else {
+      return SettingsService.getCopybookConfigValues(
+        PATHS_USS,
+        documentUri,
+        dialectType,
+      );
+    }
   }
 
   /**

@@ -11,9 +11,7 @@
  * Contributors:
  *   Broadcom, Inc. - initial API and implementation
  */
-import * as vscode from "vscode";
-import { C4Z_FOLDER } from "../../constants";
-import { getHomeFolder } from "../../test/suite/testHelper";
+import { Utils } from "./Utils";
 
 export class SettingsUtils {
   public static isValidJSON(json: string): boolean {
@@ -23,7 +21,7 @@ export class SettingsUtils {
   public static getWorkspaceFoldersPath(
     fsPath: boolean | undefined = undefined,
   ): string[] {
-    const result: string[] = [getHomeFolder()];
+    const result: string[] = [Utils.getC4ZHomeFolder()];
     return result;
   }
 }

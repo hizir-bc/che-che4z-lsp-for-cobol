@@ -109,14 +109,6 @@ function getTargetFolderForCopybook(
           Utils.getC4ZHomeFolder(),
           E4E_FOLDER,
           COPYBOOKS_FOLDER,
-          documentUri
-            .split("/")
-            .slice(1)
-            .map(decodeURIComponent)[5]
-            .split("name")[1]
-            .split(",")[0]
-            .split(":")[1]
-            .replace(/"/g, ""),
           fName.dir.replace("ndvr:", ""),
           fName.name.split(".")[0],
         ),

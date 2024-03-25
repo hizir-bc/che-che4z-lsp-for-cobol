@@ -697,7 +697,7 @@ export class CopybookDownloadService implements vscode.Disposable {
   private static getFolder(profileName): string {
     const uri = vscode.window?.activeTextEditor?.document.uri;
     const folder = CopybookURI.createDatasetPath(
-      profileName.split(".")[1],
+      "",
       uri.path.split(".")[0],
       E4E_FOLDER,
     );

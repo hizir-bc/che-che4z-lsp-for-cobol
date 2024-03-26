@@ -15,7 +15,10 @@
 import { SettingsService } from "../Settings";
 import { searchCopybookInWorkspace } from "../util/FSUtils";
 import { CopybookURI } from "./CopybookURI";
-import { CopybookName } from "./CopybookDownloadService";
+import {
+  CopybookDownloadService,
+  CopybookName,
+} from "./CopybookDownloadService";
 import * as path from "path";
 import { Utils } from "../util/Utils";
 import { COPYBOOKS_FOLDER, E4E_FOLDER } from "../../constants";
@@ -33,6 +36,8 @@ export async function resolveCopybookHandler(
   dialectType: string,
 ): Promise<string> {
   let result: string;
+  await CopybookDownloadService.initE4eAPI(documentUri);
+
   result = searchCopybook(documentUri, copybookName, dialectType);
   // check in subfolders under .copybooks (copybook downloaded from MF)
   if (!result) {
@@ -103,16 +108,20 @@ function getTargetFolderForCopybook(
       );
       break;
     case CopybookFolderKind[CopybookFolderKind["downloaded-endevor"]]:
-      const fName = path.parse(documentUri);
-      result = [
-        path.join(
-          Utils.getC4ZHomeFolder(),
-          E4E_FOLDER,
-          COPYBOOKS_FOLDER,
-          fName.dir.replace("ndvr:", ""),
-          fName.name.split(".")[0],
-        ),
-      ];
+      const api = CopybookDownloadService.getEndevorExplorerApi();
+      if (api) {
+        const fName = path.parse(documentUri);
+        result = [
+          path.join(
+            Utils.getC4ZHomeFolder(),
+            E4E_FOLDER,
+            COPYBOOKS_FOLDER,
+            api.profile.instance,
+            fName.dir.replace("ndvr:", ""),
+            fName.name.split(".")[0],
+          ),
+        ];
+      }
       break;
   }
   return result || [];

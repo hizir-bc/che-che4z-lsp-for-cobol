@@ -40,6 +40,8 @@ import {
 import { resolveSubroutineURI } from "./services/util/SubroutineUtils";
 import { ServerRuntimeCodeActionProvider } from "./services/nativeLanguageClient/serverRuntimeCodeActionProvider";
 import { ConfigurationWatcher } from "./services/util/ConfigurationWatcher";
+import { Utils } from "./services/util/Utils";
+import * as fs from "node:fs";
 
 interface __AnalysisApi {
   analysis(uri: string, text: string): Promise<any>;
@@ -56,6 +58,9 @@ function initialize() {
   languageClientService = new LanguageClientService(outputChannel);
   copyBooksDownloader.setOutputChannel(getChannel());
   const configurationWatcher = new ConfigurationWatcher();
+  if (!fs.existsSync(Utils.getC4ZHomeFolder())) {
+    fs.mkdirSync(Utils.getC4ZHomeFolder(), { recursive: true });
+  }
   return { copyBooksDownloader, configurationWatcher };
 }
 

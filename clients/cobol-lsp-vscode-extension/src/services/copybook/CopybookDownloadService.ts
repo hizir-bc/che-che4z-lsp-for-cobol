@@ -60,7 +60,9 @@ export class CopybookDownloadService implements vscode.Disposable {
   private static setEndevorExplorerApi(endevorExplorerApi: any) {
     this.endevorExplorerApi = endevorExplorerApi;
   }
-
+  public static getEndevorExplorerApi() {
+    return this.endevorExplorerApi;
+  }
   private static createErrorMessageForCopybooks(datasets: Set<string>) {
     CopybookDownloadService.processDownloadError(
       PROCESS_DOWNLOAD_ERROR_MSG + Array.from(datasets),
@@ -492,8 +494,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     startTime: number,
   ) {
     {
-      if (element?.documentUri.startsWith(E4E_SCHEME))
-        await CopybookDownloadService.initE4eAPI(element.documentUri);
+      await CopybookDownloadService.initE4eAPI(element.documentUri);
       await this.handleQueue(element, errors, progress);
 
       if (!element.quiet && this.queue.length === 0 && errors.size > 0) {
@@ -652,7 +653,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     copybookProfile: any,
     elementInfo: any,
   ) {
-    const _folder: string = this.getFolder(endevorApi.profile.profile);
+    const _folder: string = this.getFolder(endevorApi);
 
     elementInfo.element = copybookProfile.getCopybook();
     const element = await endevorApi.api.getElement(
@@ -669,7 +670,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     endevorApi: e4eResponse,
     copybookProfile: any,
   ) {
-    const _folder: string = this.getFolder(endevorApi.profile.profile);
+    const _folder: string = this.getFolder(endevorApi);
 
     const memberContent = await endevorApi.api.getMember(endevorApi.profile, {
       dataset: ds["dataset"],
@@ -694,11 +695,10 @@ export class CopybookDownloadService implements vscode.Disposable {
     );
   }
 
-  private static getFolder(profileName): string {
-    const uri = vscode.window?.activeTextEditor?.document.uri;
+  private static getFolder(api: e4eResponse): string {
     const folder = CopybookURI.createDatasetPath(
-      "",
-      uri.path.split(".")[0],
+      api.profile.instance,
+      api.uri.path.split(".")[0],
       E4E_FOLDER,
     );
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
@@ -706,7 +706,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     return folder;
   }
 
-  private static async initE4eAPI(documentUri) {
+  public static async initE4eAPI(documentUri) {
     const endevorExplorerApi: e4eResponse | null = await Utils.getE4EAPI(
       vscode.Uri.parse(documentUri),
       CopybookDownloadService.outputChannel,

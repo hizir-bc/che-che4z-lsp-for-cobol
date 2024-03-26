@@ -1,4 +1,4 @@
-import { Event } from "vscode";
+import { Event, Uri } from "vscode";
 import { ExternalConfigurationResponse } from "../lspconfig/_doc/Configuration";
 
 type Filename = string;
@@ -196,4 +196,5 @@ interface e4eResponse {
   };
   api: IEndevorApiClient;
   profile: ResolvedProfile;
+  uri: Uri;
 }

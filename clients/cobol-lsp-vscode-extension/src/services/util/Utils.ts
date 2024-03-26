@@ -99,6 +99,7 @@ export class Utils {
       },
       profile: profile,
       api: e4e,
+      uri: uri,
     };
   }
 

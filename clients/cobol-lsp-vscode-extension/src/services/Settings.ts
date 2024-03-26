@@ -59,10 +59,6 @@ export function createFileWithGivenPath(
   fileName: string,
   pattern: string,
 ): void {
-  if (Utils.getC4ZHomeFolder()) {
-    return;
-  }
-
   const ch4zPath = path.join(path.join(Utils.getC4ZHomeFolder(), folderPath));
   const filePath = path.join(ch4zPath, fileName);
   try {

@@ -36,7 +36,9 @@ export async function resolveCopybookHandler(
   dialectType: string,
 ): Promise<string> {
   let result: string;
-  await CopybookDownloadService.initE4eAPI(documentUri);
+  if (!CopybookDownloadService.getEndevorExplorerApi()) {
+    await CopybookDownloadService.initE4eAPI(documentUri);
+  }
 
   result = searchCopybook(documentUri, copybookName, dialectType);
   // check in subfolders under .copybooks (copybook downloaded from MF)

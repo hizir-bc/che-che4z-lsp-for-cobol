@@ -224,11 +224,15 @@ export class SettingsService {
    * @returns a list of dsn path
    */
   public static getDsnPath(documentUri: string, dialectType: string): string[] {
-    return SettingsService.getCopybookConfigValues(
-      PATHS_ZOWE,
-      documentUri,
-      dialectType,
-    );
+    if (Utils.isEndevorFile(documentUri)) {
+      return [documentUri];
+    } else {
+      return SettingsService.getCopybookConfigValues(
+        PATHS_ZOWE,
+        documentUri,
+        dialectType,
+      );
+    }
   }
 
   /**

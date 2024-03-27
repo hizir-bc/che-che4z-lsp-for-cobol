@@ -21,7 +21,7 @@ import {
 } from "./CopybookDownloadService";
 import * as path from "path";
 import { Utils } from "../util/Utils";
-import { COPYBOOKS_FOLDER, E4E_FOLDER } from "../../constants";
+import { COPYBOOKS_FOLDER, E4E_FOLDER, E4E_SCHEME } from "../../constants";
 
 enum CopybookFolderKind {
   "local",
@@ -119,7 +119,7 @@ function getTargetFolderForCopybook(
             E4E_FOLDER,
             COPYBOOKS_FOLDER,
             api.profile.instance,
-            fName.dir.replace("ndvr:", ""),
+            fName.dir.replace(E4E_SCHEME + ":", ""),
             fName.name.split(".")[0],
           ),
         ];

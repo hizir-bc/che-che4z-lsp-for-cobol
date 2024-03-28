@@ -74,7 +74,7 @@ export class Utils {
     const e4e: IEndevorApiClient = await this.getEndevorExplorerAPI();
 
     const uriString = uri.toString();
-    if (!e4e.isEndevorElement(uriString)) return null;
+    if (!e4e || e4e?.isEndevorElement(uriString)) return null;
 
     const profile = await e4e.getProfileInfo(uriString);
     if (profile instanceof Error) throw profile;

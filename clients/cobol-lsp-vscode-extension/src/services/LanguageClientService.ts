@@ -142,7 +142,7 @@ export class LanguageClientService {
           vscode.workspace.createFileSystemWatcher("**/proc_grps.json"),
           vscode.workspace.createFileSystemWatcher(
             new vscode.RelativePattern(
-              vscode.Uri.file(Utils.getC4ZHomeFolder()),
+              vscode.Uri.file(Utils.getExtensionFolder()),
               "**/*",
             ),
           ),

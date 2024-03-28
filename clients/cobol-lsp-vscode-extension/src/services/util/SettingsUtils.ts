@@ -21,7 +21,7 @@ export class SettingsUtils {
   public static getWorkspaceFoldersPath(
     fsPath: boolean | undefined = undefined,
   ): string[] {
-    const result: string[] = [Utils.getC4ZHomeFolder()];
+    const result: string[] = [Utils.getExtensionFolder()];
     return result;
   }
 }

@@ -12,7 +12,7 @@
  *   Broadcom, Inc. - initial API and implementation
  */
 import * as path from "node:path";
-import { C4Z_FOLDER, COPYBOOKS_FOLDER, ZOWE_FOLDER } from "../../constants";
+import { COPYBOOKS_FOLDER, ZOWE_FOLDER } from "../../constants";
 import { SettingsService } from "../Settings";
 import {
   getProgramNameFromUri,
@@ -71,7 +71,7 @@ export class CopybookURI {
     copybook: string,
   ): string {
     const rootPath = path.join(
-      Utils.getC4ZHomeFolder(),
+      Utils.getExtensionFolder(),
       ZOWE_FOLDER,
       COPYBOOKS_FOLDER,
     );
@@ -85,7 +85,7 @@ export class CopybookURI {
     source: string = ZOWE_FOLDER,
   ): string {
     const rootPath = path.join(
-      Utils.getC4ZHomeFolder(),
+      Utils.getExtensionFolder(),
       source,
       COPYBOOKS_FOLDER,
     );
@@ -93,8 +93,8 @@ export class CopybookURI {
   }
   /**
    * This method produce an array with element that following the schema
-   * "file://[WORKSPACE_FOLDER]/.c4z/.copybooks/PROFILE/DATASET" or
-   * "file://[WORKSPACE_FOLDER]/.c4z/.copybooks/PROFILE/USS"
+   * "file://[EXTENSION_FOLDER]/.copybooks/PROFILE/DATASET" or
+   * "file://[EXTENSION_FOLDER]/.copybooks/PROFILE/USS"
    * @param profile represent a name of a folder within the .copybooks folder that have the same name as the
    * connection name needed to download copybooks from mainframe.
    */
@@ -115,7 +115,7 @@ export class CopybookURI {
       result.forEach(
         (value, index) =>
           (result[index] =
-            Utils.getC4ZHomeFolder() +
+            Utils.getExtensionFolder() +
             ZOWE_FOLDER +
             "/" +
             COPYBOOKS_FOLDER +
@@ -135,7 +135,7 @@ export class CopybookURI {
       Object.assign([], ussPaths).forEach(
         (value, index) =>
           (result[index + baseIndex] =
-            C4Z_FOLDER + "/" + COPYBOOKS_FOLDER + "/" + profile + "/" + value),
+            COPYBOOKS_FOLDER + "/" + profile + "/" + value),
       );
     }
     return result;

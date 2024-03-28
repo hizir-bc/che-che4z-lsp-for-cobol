@@ -24,7 +24,7 @@ import {
 import { Utils } from "../services/util/Utils";
 
 /**
- * Clears the downloaded copybook cache folder ({os.homedir()}/.c4z/.zowe/.copybooks).
+ * Clears the downloaded copybook cache folder ({Utils.getExtensionFolder()}/.zowe/.copybooks).
  *
  */
 export function clearCache() {
@@ -32,7 +32,7 @@ export function clearCache() {
     CLEARING_COPYBOOK_CACHE,
     Promise.resolve().then(
       () => {
-        const folderUri = vscode.Uri.file(Utils.getC4ZHomeFolder());
+        const folderUri = vscode.Uri.file(Utils.getExtensionFolder());
         const fileUri = folderUri.with({
           path: path.join(folderUri.fsPath, ZOWE_FOLDER, COPYBOOKS_FOLDER),
         });

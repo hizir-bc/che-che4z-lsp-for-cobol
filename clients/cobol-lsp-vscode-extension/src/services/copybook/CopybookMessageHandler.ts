@@ -115,7 +115,7 @@ function getTargetFolderForCopybook(
         const fName = path.parse(documentUri);
         result = [
           path.join(
-            Utils.getC4ZHomeFolder(),
+            Utils.getExtensionFolder(),
             E4E_FOLDER,
             COPYBOOKS_FOLDER,
             api.profile.instance,

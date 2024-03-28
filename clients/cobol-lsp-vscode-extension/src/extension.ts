@@ -58,8 +58,8 @@ function initialize() {
   languageClientService = new LanguageClientService(outputChannel);
   copyBooksDownloader.setOutputChannel(getChannel());
   const configurationWatcher = new ConfigurationWatcher();
-  if (!fs.existsSync(Utils.getC4ZHomeFolder())) {
-    fs.mkdirSync(Utils.getC4ZHomeFolder(), { recursive: true });
+  if (!fs.existsSync(Utils.getExtensionFolder())) {
+    fs.mkdirSync(Utils.getExtensionFolder(), { recursive: true });
   }
   return { copyBooksDownloader, configurationWatcher };
 }
@@ -72,9 +72,9 @@ export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<__ExtensionApi & __AnalysisApi> {
   DialectRegistry.clear();
+  Utils.setExtensionsFolder(context.extensionPath);
   const { copyBooksDownloader, configurationWatcher } = initialize();
   initSmartTab(context);
-
   TelemetryService.registerEvent(
     "log",
     ["bootstrap", "experiment-tag"],

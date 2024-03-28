@@ -15,7 +15,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { C4Z_FOLDER, ZOWE_FOLDER } from "../../constants";
+import { ZOWE_FOLDER } from "../../constants";
 import { Utils } from "../../services/util/Utils";
 
 export const TEST_TIMEOUT = 150000;
@@ -42,15 +42,15 @@ export async function activate() {
   }
 }
 
-export function getHomeFolder(): string {
-  return Utils.getC4ZHomeFolder();
+export function getExtensionFolder(): string {
+  return Utils.getExtensionFolder();
 }
 
 export function get_editor(workspace_file: string): vscode.TextEditor {
   const editor = vscode.window.activeTextEditor;
   assert.equal(
     editor.document.uri.fsPath,
-    path.join(getHomeFolder(), ZOWE_FOLDER, workspace_file),
+    path.join(getExtensionFolder(), ZOWE_FOLDER, workspace_file),
   );
 
   return editor;
@@ -184,9 +184,13 @@ export function range(p0: vscode.Position, p1: vscode.Position): vscode.Range {
 
 export function updateConfig(configFileName: string) {
   // update the settings.json with this file content
-  const settinsFileLoc = path.join(getHomeFolder(), ".vscode", "settings.json");
+  const settinsFileLoc = path.join(
+    getExtensionFolder(),
+    ".vscode",
+    "settings.json",
+  );
   const settingvalueLoc = path.join(
-    getHomeFolder(),
+    getExtensionFolder(),
     "settings",
     configFileName,
   );

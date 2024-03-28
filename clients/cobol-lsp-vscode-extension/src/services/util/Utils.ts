@@ -14,12 +14,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from "os";
-import {
-  C4Z_FOLDER,
-  E4E_SCHEME,
-  LOOKING_FOR_COPYBOOK_LOCATION,
-} from "../../constants";
+import { E4E_SCHEME, LOOKING_FOR_COPYBOOK_LOCATION } from "../../constants";
 import {
   IEndevorApiClient,
   e4eResponse,
@@ -28,11 +23,11 @@ import {
   translateLibs,
   E4EExternalConfigurationResponse,
 } from "../../type/endevorApi.d";
-
 /**
  * This class collects utility methods for general purpose activities
  */
 export class Utils {
+  static extPath: string;
   /**
    * This method provides a quick way to verify if the input is null or undefined.
    * The idea is to have something similar to the util library {@link node.isNullOrUndefined} that is deprecated.
@@ -74,7 +69,7 @@ export class Utils {
     const e4e: IEndevorApiClient = await this.getEndevorExplorerAPI();
 
     const uriString = uri.toString();
-    if (!e4e || e4e?.isEndevorElement(uriString)) return null;
+    if (!e4e || !e4e?.isEndevorElement(uriString)) return null;
 
     const profile = await e4e.getProfileInfo(uriString);
     if (profile instanceof Error) throw profile;
@@ -102,11 +97,14 @@ export class Utils {
       uri: uri,
     };
   }
-
-  public static getC4ZHomeFolder() {
-    return path.join(os.homedir(), C4Z_FOLDER);
+  public static setExtensionsFolder(path: string) {
+    this.extPath = path;
   }
-  public static isEndevorFile(uri: String) {
+
+  public static getExtensionFolder(): string {
+    return this.extPath;
+  }
+  public static isEndevorFile(uri: String): boolean {
     return uri.startsWith(E4E_SCHEME);
   }
 

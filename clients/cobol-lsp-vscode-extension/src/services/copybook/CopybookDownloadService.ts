@@ -194,7 +194,7 @@ export class CopybookDownloadService implements vscode.Disposable {
     );
     if (!fs.existsSync(copybookPath)) {
       try {
-        // create .gitignore file within .c4z folder
+        // create .gitignore file within extension folder
         createFileWithGivenPath("", GITIGNORE_FILE, "/**");
         await CopybookDownloadService.downloadCopybookContent(
           dataset,
@@ -601,6 +601,9 @@ export class CopybookDownloadService implements vscode.Disposable {
   }
 
   private static async downloadCopybooke4E(copybookProfile: CopybookProfile) {
+    if (!CopybookDownloadService.getEndevorExplorerApi()) {
+      await this.initE4eAPI(copybookProfile.documentUri);
+    }
     const configurations = this.endevorExplorerApi.configuration;
 
     configurations.libs.forEach(async (configuration: any) => {

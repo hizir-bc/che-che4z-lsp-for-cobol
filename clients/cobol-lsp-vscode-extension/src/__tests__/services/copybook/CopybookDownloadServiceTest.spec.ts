@@ -18,7 +18,6 @@ import * as path from "path";
 import * as Path from "path";
 import * as vscode from "vscode";
 import {
-  C4Z_FOLDER,
   COPYBOOKS_FOLDER,
   DOWNLOAD_QUEUE_LOCKED_ERROR_MSG,
   INSTALL_ZOWE,
@@ -325,7 +324,6 @@ describe("Test the creation of folders that contains copybooks downloaded from M
   function setupScenario() {
     const testFolder = path.join(
       __dirname,
-      C4Z_FOLDER,
       COPYBOOKS_FOLDER,
       "profile",
       "dataset",
@@ -344,7 +342,7 @@ describe("Test the creation of folders that contains copybooks downloaded from M
   }
 
   function cleanupScenario() {
-    fs.remove(path.join(__dirname, C4Z_FOLDER));
+    fs.remove(__dirname);
   }
 
   test("With a valid configuration of dataset, zoweExplorerAPI is invoked with correct params", async () => {

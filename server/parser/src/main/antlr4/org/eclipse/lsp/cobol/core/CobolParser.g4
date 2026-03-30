@@ -2279,7 +2279,11 @@ fileName
    ;
 
 functionName
-   : INTEGER | LENGTH | RANDOM | SUM | MAX | WHEN_COMPILED | cobolWord
+   : INTEGER | LENGTH | RANDOM | SUM | MAX | WHEN_COMPILED | cobolWord | deprecatedFunctionName
+   ;
+
+deprecatedFunctionName
+   : DATEVAL | UNDATE | YEARWINDOW
    ;
 
 indexName

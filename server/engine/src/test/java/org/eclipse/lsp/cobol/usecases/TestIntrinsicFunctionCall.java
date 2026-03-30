@@ -45,6 +45,7 @@ public class TestIntrinsicFunctionCall {
     return Stream.of(
         "BIT-OF",
         "BYTE-LENGTH",
+        "DATEVAL",
         "DISPLAY-OF",
         "FORMATTED-CURRENT-DATE",
         "FORMATTED-DATE",
@@ -73,8 +74,10 @@ public class TestIntrinsicFunctionCall {
         "UPOS",
         "USUBSTR",
         "USUPPLEMENTARY",
+        "UNDATE",
         "UVALID",
-        "UWIDTH");
+        "UWIDTH",
+        "YEARWINDOW");
   }
 
   @ParameterizedTest

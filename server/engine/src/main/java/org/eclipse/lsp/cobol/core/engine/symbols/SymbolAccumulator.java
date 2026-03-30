@@ -221,6 +221,7 @@ public class SymbolAccumulator implements VariableAccumulator {
         "CONTENT-OF",
         "COS",
         "CURRENT-DATE",
+        "DATEVAL",
         "DATE-OF-INTEGER",
         "DATE-TO-YYYYMMDD",
         "DAY-OF-INTEGER",
@@ -280,6 +281,7 @@ public class SymbolAccumulator implements VariableAccumulator {
         "TEST-NUMVAL-F",
         "TRIM",
         "ULENGTH",
+        "UNDATE",
         "UPOS",
         "UPPER-CASE",
         "USUBSTR",
@@ -289,6 +291,7 @@ public class SymbolAccumulator implements VariableAccumulator {
         "UWIDTH",
         "VARIANCE",
         "WHEN-COMPILED",
+        "YEARWINDOW",
         "YEAR-TO-YYYY");
   }
 

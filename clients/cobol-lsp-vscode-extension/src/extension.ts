@@ -606,16 +606,91 @@ function registerEvents(
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((event) =>
-      analysisService.invalidate(event.document.uri.toString(), false),
-    ),
+    vscode.workspace.onDidChangeTextDocument(async (event) => {
+      await analysisService.invalidate(event.document.uri.toString(), false);
+      clearDecorations();
+      setDecorations(event.document.uri);
+    }),
   );
+
+  const decorationType = vscode.window.createTextEditorDecorationType({
+    after: {
+      margin: "0 0 0 1rem",
+      color: "rgba(172, 166, 166, 0.7)",
+      fontStyle: "italic",
+      fontWeight: "normal",
+    },
+    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+  });
+
+  function clearDecorations() {
+    const editor = vscode.window.activeTextEditor;
+    editor!.setDecorations(decorationType, []);
+  }
+
+  function setDecorations(uri: vscode.Uri) {
+    const editor = vscode.window.activeTextEditor;
+
+    const diagnostics = vscode.languages.getDiagnostics(uri);
+
+    const byLine = new Map<number, vscode.Diagnostic[]>();
+    for (const d of diagnostics) {
+      const line = d.range.start.line;
+      if (!byLine.has(line)) {
+        byLine.set(line, []);
+      }
+      byLine.get(line)!.push(d);
+    }
+
+    const decorations: vscode.DecorationOptions[] = [];
+
+    for (const [line, diags] of byLine.entries()) {
+      const textLine = editor!.document.lineAt(line);
+
+      if (!textLine) continue;
+
+      const lineText = textLine.text;
+
+      if (typeof lineText !== "string") continue;
+
+      const message = diags.map((d) => d.message).join(" | ");
+
+      const targetColumn = 80;
+      const currentLength = lineText.length;
+      const spacesNeeded = Math.max(1, targetColumn - currentLength);
+
+      const padding = " ".repeat(spacesNeeded);
+
+      const decorationText = `${padding}❗ ${message}`;
+
+      const range = new vscode.Range(
+        line,
+        lineText.length,
+        line,
+        lineText.length,
+      );
+
+      decorations.push({
+        range,
+        renderOptions: {
+          after: {
+            contentText: decorationText,
+          },
+        },
+      });
+    }
+
+    if (decorations.length > 0) {
+      editor!.setDecorations(decorationType, decorations);
+    }
+  }
 
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument((document) => {
       void analysisService.invalidate(document.uri.toString(), true);
       invalidateConfig(document.uri);
       deleteDiagnostics(document.uri);
+      clearDecorations();
     }),
   );
 }
